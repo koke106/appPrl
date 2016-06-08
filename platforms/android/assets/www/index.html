@@ -113,6 +113,7 @@
                     <input type="radio" name="23" value="No" onclick="abreCamaraFoto('21');">No
                     <input type="radio" name="23" value="Np">Np<br/>
         </div>
+
     </div>
     
 
@@ -120,7 +121,9 @@
 
 
     <div id="pie"></div>
-    <input type="hidden" id="onlOffl" value=""> 
+    <input type="hidden" id="onlOffl" value="">
+    <input type="hidden" id="zonaSel" value=""> 
+    <input type="hidden" id="carpetaTmpName" value=""> 
   </body>
 </html>
 
@@ -188,7 +191,8 @@ function onRequestFileSystemSuccess(fileSystem) {
     entry.getDirectory(nombreObra, {create: true, exclusive: false}, onGetDirectorySuccess, onGetDirectoryFail); 
 } 
 function onGetDirectorySuccess(dir) { 
-    alert("Created dir "+dir.name); 
+    //alert("Created dir "+dir.name); 
+    $('#carpetaTmpName').val(dir.name);
 } 
 
 function onGetDirectoryFail(error) { 
@@ -198,17 +202,34 @@ function onGetDirectoryFail(error) {
 /************CAMARA DE FOTOS**********/
 function abreCamaraFoto(zona){
     console.log('zona->'+zona);
-    navigator.camera.getPicture(onSuccess, onFail, { quality: 50, destinationType: Camera.DestinationType.FILE_URI });
+    $('#zonaSel').val(zona);    
+    navigator.camera.getPicture(onSuccess, onFail, { 
+        quality: 35, 
+        destinationType: Camera.DestinationType.FILE_URI,
+        allowEdit : true,
+        encodingType: Camera.EncodingType.JPEG
+    });
 }
 function onSuccess(imageURI) {
-    var image = document.getElementById('fotoLocal');
     image.src = imageURI;
     alert(image.src);
+    var zona = $('#zonaSel').val();
+    var nombreImagen = imageURI+'_'+zona;
+    var carpetaNombre = $('#carpetaTmpName').val();
+    imageURI.moveTo(carpetaNombre, imageURI, moveSuccess, function(error){onfail(error,'Move Image')}); 
 }
 function onFail(message) {
-    alert('Failed because: ' + message);
-    alert('Es necesario adjuntar una foto..');
-    navigator.camera.getPicture(onSuccess, onFail, { quality: 50, destinationType: Camera.DestinationType.FILE_URI });
+    if (confirm('Quieres cambiar tu respuesta?')) {
+        var pregunta = $('#zonaSel').val();
+        alert('pregunta->'+pregunta);
+        $('input:radio[name='+pregunta+']').attr('checked',false);
+    }else{
+        navigator.camera.getPicture(onSuccess, onFail, { quality: 50, destinationType: Camera.DestinationType.FILE_URI });
+    }
+    
+}
+function moveSuccess(){
+    alert('IMAGEN GUARDADA!');   
 }
 
 </script>
