@@ -164,6 +164,8 @@ function abreNuevoForm(){
         alert('estamos en online'+$('#seleccionObra').val());
         $('obraNombre').val($('#seleccionObra').val()); 
         $('#form').css('display','block'); 
+        $('#obraName').val($('#seleccionObra').val());
+        window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, onRequestFileSystemSuccess, null);
     }
     $('#modoOnline').css('display','none'); 
     $('#onlineOffline').css('display','none');    
@@ -191,8 +193,8 @@ function onRequestFileSystemSuccess(fileSystem) {
     entry.getDirectory(nombreObra, {create: true, exclusive: false}, onGetDirectorySuccess, onGetDirectoryFail); 
 } 
 function onGetDirectorySuccess(dir) { 
-    //alert("Created dir "+dir.name); 
-    $('#carpetaTmpName').val(dir.name);
+    alert("Created dir "+dir.fullPath); 
+    $('#carpetaTmpName').val(dir.fullPath);
 } 
 
 function onGetDirectoryFail(error) { 
@@ -203,20 +205,23 @@ function onGetDirectoryFail(error) {
 function abreCamaraFoto(zona){
     console.log('zona->'+zona);
     $('#zonaSel').val(zona);    
-    navigator.camera.getPicture(onSuccess, onFail, { 
+    navigator.camera.getPicture(fotoOk, onFail, { 
         quality: 35, 
         destinationType: Camera.DestinationType.FILE_URI,
-        allowEdit : true,
         encodingType: Camera.EncodingType.JPEG
     });
 }
-function onSuccess(imageURI) {
-    image.src = imageURI;
-    alert(image.src);
-    var zona = $('#zonaSel').val();
-    var nombreImagen = imageURI+'_'+zona;
+function fotoOk(imageURI) {
+    alert('onSuccess');
+    //image.src = imageURI;
+    alert('getImageURI'+imageURI);
+    var nombreImagen = imageURI.substring(imageURI.lastIndexOf('/')+1);
+    
     var carpetaNombre = $('#carpetaTmpName').val();
-    imageURI.moveTo(carpetaNombre, imageURI, moveSuccess, function(error){onfail(error,'Move Image')}); 
+    alert(' nombreImagen->'+nombreImagen+' carpetaNombre->'+carpetaNombre);
+    imageURI.copyTo(carpetaNombre, 'newImg.jpg', moveSuccess, moveFail);
+
+    
 }
 function onFail(message) {
     if (confirm('Quieres cambiar tu respuesta?')) {
@@ -224,12 +229,15 @@ function onFail(message) {
         alert('pregunta->'+pregunta);
         $('input:radio[name='+pregunta+']').attr('checked',false);
     }else{
-        navigator.camera.getPicture(onSuccess, onFail, { quality: 50, destinationType: Camera.DestinationType.FILE_URI });
+        navigator.camera.getPicture(fotoOk, onFail, { quality: 50, destinationType: Camera.DestinationType.FILE_URI });
     }
     
 }
 function moveSuccess(){
-    alert('IMAGEN GUARDADA!');   
+    alert('FICHERO MOVIDO!');   
+}
+function moveFail(){
+    alert('FICHERO FALLO!');   
 }
 
 </script>
