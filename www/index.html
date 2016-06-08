@@ -158,7 +158,6 @@ function abreNuevoForm(){
         $('#nuevoNombreForm').css('display','block');
         $('#modoOffline').css('display','none');
     }else{
-        alert('estamos en online'+$('#seleccionObra').val());
         $('obraNombre').val($('#seleccionObra').val()); 
         $('#form').css('display','block'); 
         $('#obraName').val($('#seleccionObra').val());
@@ -187,118 +186,28 @@ function onRequestFileSystemSuccess(fileSystem) {
     nombreObra = nombreObra.replace(/\s/g,"_");
     nombreObra += '_0001';
     var entry=fileSystem.root; 
-    entry.getDirectory('0_0001', {create: true, exclusive: false}, onGetDirectorySuccess, onGetDirectoryFail); 
+    entry.getDirectory('0_0001', {create: true, exclusive: false}, onGetDirectorySuccess, onGetDirectoryFail);
 } 
 function onGetDirectorySuccess(dir) { 
     alert("Created dir "+dir.fullPath); 
     $('#carpetaTmpName').val(dir);
 } 
-
 function onGetDirectoryFail(error) { 
     alert("Error creating directory "+error.code); 
 } 
 
 /************CAMARA DE FOTOS**********/
-function abreCamaraFoto(zona){
-    navigator.camera.getPicture(createFileEntry, onFail, { 
-        quality: 35, 
-        destinationType: Camera.DestinationType.FILE_URI,
-        encodingType: Camera.EncodingType.JPEG,
-        pictureSourceType:Camera.PictureSourceType.CAMERA 
-    });
+function abreCamaraFoto() {
+    navigator.camera.getPicture(onPhotoURISuccess, fsFail, { quality: 50, destinationType: Camera.DestinationType.FILE_URI });
 }
-function onFail(message) {
-    alert('Ocurrio un error: ' + message);
-}
-
-function createFileEntry(imageURI) {
+function onPhotoURISuccess(imageURI) {
     alert('imageURI->'+imageURI);
-    var nombreImagen = imageURI.substring(imageURI.lastIndexOf('/')+1);
-    $('#nombrOculto').val(nombreImagen);
-    var carpetaNombre = $('#carpetaTmpName').val();
-
-    var imageUri = imageURI;
-    var newFileName = nombreImagen;
-    var directoryFullPath = 'file:///0_0001/';
-    alert('imageUri->'+imageUri+' newFileName->'+newFileName+' directoryFullPath->'+directoryFullPath);
-    window.resolveLocalFileSystemURI(
-       imageUri,
-       function (entry) {
-        alert("Get file entry success, copy file");
-        var parentEntry = new DirectoryEntry({ fullPath: directoryFullPath});
-        entry.copyTo(
-            parentEntry,
-            newFileName,
-            function (newEntry) {
-                alert("FileEntry copy to done. New Path: " + newEntry.fullPath);
-             },
-             function (error) {
-                 alert("FileEntry copy to fail. Error code: " + error.code);
-             }
-        )
-    });
+    imageURI.moveTo('file:///0_0001/', 'img000123.jpg', todoOK, fsFail);
 }
-    /*
-    window.resolveLocalFileSystemURI(imageURI, copyPhoto, fail);    
+function fsFail(error) {
+    alert('failed with error code: ' + error.code);
 }
-
-function onFileSystemSuccess(fileSystem) {
-    alert(fileSystem.name);
-    alert(fileSystem.root.name);
+function todoOK(resp){
+    alert('resp->'+resp);
 }
-
-function copyPhoto(fileEntry) {
-    var carpetaNombre = $('#carpetaTmpName').val();
-    var nombreImagen = $('#nombrOculto').val();
-    alert('copyPhoto->'+fileEntry+' carpetaNombre->'+carpetaNombre+' nombreImagen->'+nombreImagen);
-    window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function(fileSys) { 
-        fileSys.root.getDirectory(carpetaNombre, {create: true, exclusive: false}, function(dir) {
-                fileEntry.copyTo(dir, nombreImagen, onCopySuccess, fail); 
-            }, fail); 
-    }, fail); 
-}
-function fail(fallo){
-    alert('fail->'+fallo);
-}
-function onCopySuccess(bien){
-    alert('copia realizada->'+bien);
-}
-/************CAMARA DE FOTOS**********//*
-function abreCamaraFoto(zona){
-    console.log('zona->'+zona);
-    $('#zonaSel').val(zona);    
-    navigator.camera.getPicture(fotoOk, onFail, { 
-        quality: 35, 
-        destinationType: Camera.DestinationType.FILE_URI,
-        encodingType: Camera.EncodingType.JPEG
-    });
-}
-function fotoOk(imageURI) {
-    alert('onSuccess');
-    //image.src = imageURI;
-    alert('getImageURI'+imageURI);
-    var nombreImagen = imageURI.substring(imageURI.lastIndexOf('/')+1);
-    
-    var carpetaNombre = $('#carpetaTmpName').val();
-    alert(' nombreImagen->'+nombreImagen+' carpetaNombre->'+carpetaNombre);
-    imageURI.moveTo(carpetaNombre, nombreImagen, moveSuccess, moveFail); 
-    
-}
-function onFail(message) {
-    if (confirm('Quieres cambiar tu respuesta?')) {
-        var pregunta = $('#zonaSel').val();
-        alert('pregunta->'+pregunta);
-        $('input:radio[name='+pregunta+']').attr('checked',false);
-    }else{
-        navigator.camera.getPicture(fotoOk, onFail, { quality: 50, destinationType: Camera.DestinationType.FILE_URI });
-    }
-    
-}
-function moveSuccess(){
-    alert('FICHERO MOVIDO!');   
-}
-function moveFail(){
-    alert('FICHERO FALLO!');   
-}*/
-
 </script>
