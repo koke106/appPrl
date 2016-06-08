@@ -115,10 +115,6 @@
         </div>
 
     </div>
-    
-
-
-
 
     <div id="pie"></div>
     <input type="hidden" id="onlOffl" value="">
@@ -191,11 +187,11 @@ function onRequestFileSystemSuccess(fileSystem) {
     nombreObra = nombreObra.replace(/\s/g,"_");
     nombreObra += '_0001';
     var entry=fileSystem.root; 
-    entry.getDirectory(nombreObra, {create: true, exclusive: false}, onGetDirectorySuccess, onGetDirectoryFail); 
+    entry.getDirectory('0_0001', {create: true, exclusive: false}, onGetDirectorySuccess, onGetDirectoryFail); 
 } 
 function onGetDirectorySuccess(dir) { 
     alert("Created dir "+dir.fullPath); 
-    $('#carpetaTmpName').val(dir.fullPath);
+    $('#carpetaTmpName').val(dir);
 } 
 
 function onGetDirectoryFail(error) { 
@@ -219,7 +215,36 @@ function createFileEntry(imageURI) {
     alert('imageURI->'+imageURI);
     var nombreImagen = imageURI.substring(imageURI.lastIndexOf('/')+1);
     $('#nombrOculto').val(nombreImagen);
+    var carpetaNombre = $('#carpetaTmpName').val();
+
+    var imageUri = imageURI;
+    var newFileName = nombreImagen;
+    var directoryFullPath = 'file:///0_0001/';
+    alert('imageUri->'+imageUri+' newFileName->'+newFileName+' directoryFullPath->'+directoryFullPath);
+    window.resolveLocalFileSystemURI(
+       imageUri,
+       function (entry) {
+        alert("Get file entry success, copy file");
+        var parentEntry = new DirectoryEntry({ fullPath: directoryFullPath});
+        entry.copyTo(
+            parentEntry,
+            newFileName,
+            function (newEntry) {
+                alert("FileEntry copy to done. New Path: " + newEntry.fullPath);
+             },
+             function (error) {
+                 alert("FileEntry copy to fail. Error code: " + error.code);
+             }
+        )
+    });
+}
+    /*
     window.resolveLocalFileSystemURI(imageURI, copyPhoto, fail);    
+}
+
+function onFileSystemSuccess(fileSystem) {
+    alert(fileSystem.name);
+    alert(fileSystem.root.name);
 }
 
 function copyPhoto(fileEntry) {
@@ -228,8 +253,7 @@ function copyPhoto(fileEntry) {
     alert('copyPhoto->'+fileEntry+' carpetaNombre->'+carpetaNombre+' nombreImagen->'+nombreImagen);
     window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function(fileSys) { 
         fileSys.root.getDirectory(carpetaNombre, {create: true, exclusive: false}, function(dir) {
-                alert('dir->'+dir.fullPath); 
-                fileEntry.copyTo(dir, 'aaaa.jpg', onCopySuccess, fail); 
+                fileEntry.copyTo(dir, nombreImagen, onCopySuccess, fail); 
             }, fail); 
     }, fail); 
 }
