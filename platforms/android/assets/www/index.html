@@ -123,7 +123,8 @@
     <div id="pie"></div>
     <input type="hidden" id="onlOffl" value="">
     <input type="hidden" id="zonaSel" value=""> 
-    <input type="hidden" id="carpetaTmpName" value=""> 
+    <input type="hidden" id="carpetaTmpName" value="">
+    <input type="hidden" id="nombrOculto" value=""> 
   </body>
 </html>
 
@@ -203,6 +204,42 @@ function onGetDirectoryFail(error) {
 
 /************CAMARA DE FOTOS**********/
 function abreCamaraFoto(zona){
+    alert('CAM'+zona);   
+    navigator.camera.getPicture(createFileEntry, onFail, { 
+        quality: 35, 
+        destinationType: Camera.DestinationType.FILE_URI,
+        encodingType: Camera.EncodingType.JPEG
+    });
+}
+function onFail(message) {
+    alert('Ocurrio un error: ' + message);
+}
+
+function createFileEntry(imageURI) {
+    alert('imageURI->'+imageURI);
+    var nombreImagen = imageURI.substring(imageURI.lastIndexOf('/')+1);
+    $('#nombrOculto').val(nombreImagen);
+    window.resolveLocalFileSystemURI(imageURI, copyPhoto, fail);    
+}
+
+function copyPhoto(fileEntry) {
+    var carpetaNombre = $('#carpetaTmpName').val();
+    var nombreImagen = $('#nombrOculto').val();
+    alert('copyPhoto->'+fileEntry+' carpetaNombre->'+carpetaNombre+' nombreImagen->'+nombreImagen);
+    window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function(fileSys) { 
+        fileSys.root.getDirectory(carpetaNombre, {create: true, exclusive: false}, function(dir) { 
+                fileEntry.copyTo(dir, nombreImagen, onCopySuccess, fail); 
+            }, fail); 
+    }, fail); 
+}
+function fail(fallo){
+    alert('fail->'+fallo);
+}
+function onCopySuccess(bien){
+    alert('copia realizada->'+bien);
+}
+/************CAMARA DE FOTOS**********//*
+function abreCamaraFoto(zona){
     console.log('zona->'+zona);
     $('#zonaSel').val(zona);    
     navigator.camera.getPicture(fotoOk, onFail, { 
@@ -219,8 +256,7 @@ function fotoOk(imageURI) {
     
     var carpetaNombre = $('#carpetaTmpName').val();
     alert(' nombreImagen->'+nombreImagen+' carpetaNombre->'+carpetaNombre);
-    imageURI.copyTo(carpetaNombre, 'newImg.jpg', moveSuccess, moveFail);
-
+    imageURI.moveTo(carpetaNombre, nombreImagen, moveSuccess, moveFail); 
     
 }
 function onFail(message) {
@@ -238,6 +274,6 @@ function moveSuccess(){
 }
 function moveFail(){
     alert('FICHERO FALLO!');   
-}
+}*/
 
 </script>
