@@ -190,7 +190,7 @@ function onRequestFileSystemSuccess(fileSystem) {
 } 
 function onGetDirectorySuccess(dir) { 
     alert("Created dir "+dir.fullPath); 
-    $('#carpetaTmpName').val(dir);
+    $('#carpetaTmpName').val(dir.fullPath);
 } 
 function onGetDirectoryFail(error) { 
     alert("Error creating directory "+error.code); 
@@ -202,7 +202,9 @@ function abreCamaraFoto() {
 }
 function onPhotoURISuccess(imageURI) {
     alert('imageURI->'+imageURI);
-    imageURI.moveTo('file:///0_0001/', 'img000123.jpg', todoOK, fsFail);
+    var carpetaDest = $('#carpetaTmpName').val();
+    alert('carpetaDest->'+carpetaDest);
+    imageURI.moveTo(carpetaDest, 'img000123.jpg', todoOK, fsFail);
 }
 function fsFail(error) {
     alert('failed with error code: ' + error.code);
