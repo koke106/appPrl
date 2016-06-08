@@ -208,7 +208,8 @@ function abreCamaraFoto(zona){
     navigator.camera.getPicture(createFileEntry, onFail, { 
         quality: 35, 
         destinationType: Camera.DestinationType.FILE_URI,
-        encodingType: Camera.EncodingType.JPEG
+        encodingType: Camera.EncodingType.JPEG,
+        pictureSourceType:Camera.PictureSourceType.SAVEDPHOTOALBUM 
     });
 }
 function onFail(message) {
