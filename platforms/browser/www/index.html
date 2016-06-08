@@ -207,6 +207,8 @@ function onSuccess(imageURI) {
 }
 function onFail(message) {
     alert('Failed because: ' + message);
+    alert('Es necesario adjuntar una foto..');
+    navigator.camera.getPicture(onSuccess, onFail, { quality: 50, destinationType: Camera.DestinationType.FILE_URI });
 }
 
 </script>
