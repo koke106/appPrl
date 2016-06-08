@@ -204,12 +204,11 @@ function onGetDirectoryFail(error) {
 
 /************CAMARA DE FOTOS**********/
 function abreCamaraFoto(zona){
-    alert('CAM'+zona);   
     navigator.camera.getPicture(createFileEntry, onFail, { 
         quality: 35, 
         destinationType: Camera.DestinationType.FILE_URI,
         encodingType: Camera.EncodingType.JPEG,
-        pictureSourceType:Camera.PictureSourceType.SAVEDPHOTOALBUM 
+        pictureSourceType:Camera.PictureSourceType.CAMERA 
     });
 }
 function onFail(message) {
@@ -228,8 +227,9 @@ function copyPhoto(fileEntry) {
     var nombreImagen = $('#nombrOculto').val();
     alert('copyPhoto->'+fileEntry+' carpetaNombre->'+carpetaNombre+' nombreImagen->'+nombreImagen);
     window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function(fileSys) { 
-        fileSys.root.getDirectory(carpetaNombre, {create: true, exclusive: false}, function(dir) { 
-                fileEntry.copyTo(dir, nombreImagen, onCopySuccess, fail); 
+        fileSys.root.getDirectory(carpetaNombre, {create: true, exclusive: false}, function(dir) {
+                alert('dir->'+dir.fullPath); 
+                fileEntry.copyTo(dir, 'aaaa.jpg', onCopySuccess, fail); 
             }, fail); 
     }, fail); 
 }
