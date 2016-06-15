@@ -189,7 +189,9 @@ function onGetDirectorySuccess(dir) {
     alert("Created dir "+dir.fullPath); 
     $('#carpetaTmpName').val(dir.fullPath);
     //Copiamos el formRespuestas.xml a esta nueva carpeta para empezar a rellenar:
-    
+    alert('llamammos al copye file con '+dir.fullPath);
+    copyFile(dir.fullPath);
+
 } 
 /******* COPIAR XML DE RESPUESTAS A NUESTRA CARPETA TEMPORAL ******/
 
@@ -204,6 +206,7 @@ function falloCopiaXml(error) {
 function copyFile(entry) {
     
     var ruta = $('#carpetaTmpName').val();
+    alert('entro y pongo ruta: '+ruta);
     // copy the file to a new directory and rename it
     entry.copyTo('/sdcard/prueba_0001/', "prueba01.xml", correctaCopiaXml, falloCopiaXml);
 }
@@ -272,12 +275,12 @@ function fail(error) {
 
 $( document ).ready(function() {
 
- 
+    copyFile('formulario_PRL.xml');
 
-   $.get("formulario_PRL.xml", function (xml) {
+    $.get("formulario_PRL.xml", function (xml) {
         //Copiarlo a la ruta adecuada:
         ///sdcard/prueba_0001/
-        copyFile('formulario_PRL.xml');
+       
         $(xml).find("apartado").each(function () {
      
            var seccion = $(this).find('seccion').text();
@@ -287,7 +290,7 @@ $( document ).ready(function() {
            alert('seccion->'+seccion+' pregunta->'+pregunta+' etiqueta->'+etiqueta);
         });
     });
-});
+    });
 
 
 </script>
