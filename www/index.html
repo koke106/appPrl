@@ -63,6 +63,7 @@
         <h1 id="tituloCabeceraPrincipal" style="color:#36c; letter-spacing: 0.15em;" >PRL</h1>
     </div>
     <div id="cuerpo">
+        <p id="fichero"></p>
         <!--Pinta mapa:-->
         <div id="basic_map"></div>
         <!--Pinta botones eleccion tipo navegacion:-->
@@ -229,7 +230,23 @@ function todoOK(resp){
 }
 
 $( document ).ready(function() {
-   $.get("/formulario_PRL.xml", function (xml) {
+
+    fileSystem.name.getFile("formulario_PRL.xml", {}, 
+                    function(fileEntry){
+
+                      fileEntry.file(function(file){
+
+                                  var reader = new FileReader();
+                                reader.onloadend = function(evt) {
+
+                                var prueba = document.getElementById('fichero');
+                                prueba.innerHTML = 'Texto: <br/>' + this.result;
+                        };
+                        reader.readAsText(file);
+                
+                }, fail)}, fail);
+
+   $.get("formulario_PRL.xml", function (xml) {
         $(xml).find("apartado").each(function () {
      
            var seccion = $(this).find('seccion').text();
