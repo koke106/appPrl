@@ -207,8 +207,11 @@ function copyFile(entry) {
     
     var ruta = $('#carpetaTmpName').val();
     alert('entro y pongo ruta: '+ruta);
+    var entry = 'file:///android_asset/www/formulario_PRL.xml';
+    // file:///android_asset/www/index.html
+    // file:///android_asset/www/formulario_PRL.xml
     // copy the file to a new directory and rename it
-    entry.copyTo('/sdcard/prueba_0001/', "prueba01.xml", correctaCopiaXml, falloCopiaXml);
+    entry.copyTo('file:///sdcard/prueba_0001/', "prueba01.xml", correctaCopiaXml, falloCopiaXml);
 }
 
 
