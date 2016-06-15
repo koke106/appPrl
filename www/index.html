@@ -179,7 +179,6 @@ function onRequestFileSystemSuccess(fileSystem) {
     var nombreObra = $('#obraName').val();
     nombreObra = nombreObra.replace(/\s/g,"_");
     nombreObra += '_0001';
-    $('#obraName').val(nombreObra);
     var entry=fileSystem.root; 
     entry.getDirectory(nombreObra, {create: true, exclusive: false}, onGetDirectorySuccess, onGetDirectoryFail);
 } 
@@ -187,12 +186,12 @@ function onGetDirectorySuccess(dir) {
     alert("Created dir "+dir.fullPath); 
     $('#carpetaTmpName').val(dir.fullPath);
     //Copiamos el formRespuestas.xml a esta nueva carpeta para empezar a rellenar:
-    copyFile(dir);
+    copyFile(dir.fullPath);
 } 
 /******* COPIAR XML DE RESPUESTAS A NUESTRA CARPETA TEMPORAL ******/
 
 function correctaCopiaXml(entry) {
-    console.log("New Path: " + entry.fullPath);
+    alert("New Path: " + entry.fullPath);
 }
 
 function falloCopiaXml(error) {
@@ -201,9 +200,9 @@ function falloCopiaXml(error) {
 
 function copyFile(entry) {
     
-    var ruta = $('#obraName').val();
+    var ruta = $('#carpetaTmpName').val();
     // copy the file to a new directory and rename it
-    entry.copyTo(ruta, "formRespuestas"+ruta+".xml", correctaCopiaXml, falloCopiaXml);
+    entry.copyTo(ruta, "prueba01.xml", correctaCopiaXml, falloCopiaXml);
 }
 
 
