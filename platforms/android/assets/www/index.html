@@ -5,6 +5,7 @@
 
     <script type="text/javascript" charset="utf-8" src="cordova.js"></script>
     <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.12.2.min.js"></script>
+    <!---  VALOR APIKEY: AIzaSyCTj2UDMMYLM28CcqpQBGmycxMeUslXbRE --> 
     <!--<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTj2UDMMYLM28CcqpQBGmycxMeUslXbRE"></script>
     <script src="https://rawgit.com/HPNeo/gmaps/master/gmaps.js"></script>-->
   
@@ -12,6 +13,8 @@
     document.addEventListener("deviceready", onDeviceReady, false);
 
     function onDeviceReady() {
+        //Comprobamos que tenemos al menos un xml disponible:
+
         navigator.geolocation.getCurrentPosition(onSuccess, onError);
     }
     function onSuccess(position) {
@@ -53,70 +56,49 @@
     }
 
     </script>
-<!---  AIzaSyCTj2UDMMYLM28CcqpQBGmycxMeUslXbRE --> 
   </head>
-  <body style="position: relative; margin:0 auto; text-align: center; width: 100%;">
+  <body style="position: relative; margin:0 auto; text-align: center; width: 100%; background-color:#B0A88B; ">
     <div id="cabecera">
         <div style="float: left; position: absolute; margin: 0 auto; margin-left:2em;" id="flechaBack"><img src="home.png" onclick="atras();"></div>
-        <h1>PRL</h1>
+        <h1 id="tituloCabeceraPrincipal" style="color:#36c; letter-spacing: 0.15em;" >PRL</h1>
     </div>
     <div id="cuerpo">
-
+        <!--Pinta mapa:-->
         <div id="basic_map"></div>
+        <!--Pinta botones eleccion tipo navegacion:-->
         <div id="onlineOffline">
-                <input type="button" name="Trabajar Offline" value="Trabajar Offline" onclick="modoOffline();"><br/>
-                <input style="margin-top:2em;"  type="button" name="Trabajar Online" value="Trabajar Online" onclick="modoOnline();">
+            <input id="ofWork" type="button" name="Trabajar Offline" value="Trabajar Offline" onclick="modoNav('1');" style="position:relative; margin:0 auto; text-align:center; background-color:transparent; border-radius: 4px; border:0; box-shadow: inset 0 0 0 2px #36c; color:#36c !important; font-size: 1em; font-weight: 600; letter-spacing: 0.15em; height: 3.5em; line-height: 3.45em; overflow: hidden; text-decoration: none; text-transform: uppercase; margin-bottom:1em;"><br/>
+            <input id="onWork"  type="button" name="Trabajar Online" value="Trabajar Online" onclick="modoNav('2');" style=" position:relative; margin:0 auto; text-align:center; background-color:transparent; border-radius: 4px; border:0; box-shadow: inset 0 0 0 2px #36c; color:#36c !important; font-size: 1em; font-weight: 600; letter-spacing: 0.15em; height: 3.5em; line-height: 3.45em; overflow: hidden; text-decoration: none; text-transform: uppercase;">
         </div>
         <!--OFFLINE-->
         <div id="modoOffline" style="display:none;">
-            <input style="margin-bottom: 4em;" type="button" name="Nueva Revisi&oacute;n" value="Nueva Revisi&oacute;n" onclick="abreNuevoForm();"><br/>
+            <input id="revOffline" type="button" name="Nueva Revisi&oacute;n" value="Nueva Revisi&oacute;n" onclick="abreNuevoForm();" style="position:relative; margin:0 auto; text-align:center; background-color:transparent; border-radius: 4px; border:0; box-shadow: inset 0 0 0 2px #36c; color:#36c !important; font-size: 1em; font-weight: 600; letter-spacing: 0.15em; height: 3.5em; line-height: 3.45em; margin-bottom: 4em; overflow: hidden; text-decoration: none; text-transform: uppercase;"><br/>
             <span>OBRA EJEMPLO 1 . CERRADA</span><br/>
             <span>OBRA EJEMPLO 2 . CERRADA</span><br/>
             <span>OBRA EJEMPLO 3 . CERRADA</span><br/>
             <span>OBRA EJEMPLO 4 . CERRADA</span><br/>
         </div>        
         <div id="nuevoNombreForm" style="display:none;">
-            <input type="text" value="" placeholder="Nombre Obra" id="obraName" >
-            <input type="button" value="Crear Nueva Revision" name="Crear Nueva Revision" onclick="guardaFormTmp();">
+            <input type="text" value="" placeholder="Nombre Obra" id="obraName" style="margin: 0 auto;text-align: center; border-radius: 4px; border: 0; font-size: 1.5em;  overflow: hidden; text-decoration: none; margin-bottom:1em;"><br/>
+            <input id="nuevRevOff" type="button" value="Crear Nueva Revision" name="Crear Nueva Revision" onclick="guardaFormTmp();" style="position:relative; margin:0 auto; text-align:center; background-color:transparent; border-radius: 4px; border:0; box-shadow: inset 0 0 0 2px #36c; color:#36c !important; font-size: 1em; font-weight: 600; letter-spacing: 0.15em; height: 3.5em; line-height: 3.45em; overflow: hidden; text-decoration: none; text-transform: uppercase;">
         </div>
         <!--ONLINE-->
         <div id="modoOnline" style="display:none;">
-            <select id="seleccionObra">
+            <select id="seleccionObra" style="margin: 0 auto;text-align: center; border-radius: 4px; border: 0; font-size: 1.5em;  overflow: hidden; text-decoration: none; margin-bottom:1em; font-size:12pt;">
                 <option value="0" selected>Seleccione una obra</option>
                 <option value="1">Obra 1</option>
                 <option value="2">Obra 2</option>
                 <option value="3">Obra 3</option>
                 <option value="4">Obra 4</option>
-            </select>            
-            <input type="button" name="Nueva Revisi&oacute;n" value="Nueva Revisi&oacute;n" onclick="abreNuevoForm();">
+            </select><br/>
+            <input id="revOnln" type="button" name="Nueva Revisi&oacute;n" value="Nueva Revisi&oacute;n" onclick="abreNuevoForm();" style="margin-top:1em; position:relative; margin:0 auto; text-align:center; background-color:transparent; border-radius: 4px; border:0; box-shadow: inset 0 0 0 2px #36c; color:#36c !important; font-size: 1em; font-weight: 600; letter-spacing: 0.15em; height: 3.5em; line-height: 3.45em; overflow: hidden; text-decoration: none; text-transform: uppercase;">
         </div>
-
-
-        <div id="form" style="display:none;">
-            <h1 id="nombreFormularioTmp">FORMULARIO</h1>
-
-                <h2 id="cabeceraFormDocumentacion">DOCUMENTACION</h2>
-                    <span>Se dispone en la obra de Plan de Seguridad y Salud / Plan de Medidas Preventivas de los trabajos</span><br/>
-                    <form>
-                        <input type="radio" name="21" value="Si">Si
-                        <input type="radio" name="21" value="No">No
-                    </form>
-                <h2 id="cabeceraFormLugarTrabajo">LUGAR DE TRABAJO</h2>
-                    <span>El espacio de trabajo está limpio y ordenado</span><br/>
-                    <form>
-                        <input type="radio" name="22" value="Si">Si
-                        <input type="radio" name="22" value="No" onclick="abreCamaraFoto('22');">No
-                        <input type="radio" name="22" value="Np">Np<br/>
-                    </form>
-                    <span>Estan delimitadas las zonas de trabajo de las zonas de transito</span><br/>
-                    <input type="radio" name="23" value="Si">Si
-                    <input type="radio" name="23" value="No" onclick="abreCamaraFoto('21');">No
-                    <input type="radio" name="23" value="Np">Np<br/>
-        </div>
-
+        <!--Pinta Formulario a partir del xml:-->
+        <div id="formularioXML" style="display:none;" ></div>
     </div>
 
     <div id="pie"></div>
+    <!--Valores necesarios ocultos:-->    
     <input type="hidden" id="onlOffl" value="">
     <input type="hidden" id="zonaSel" value=""> 
     <input type="hidden" id="carpetaTmpName" value="">
@@ -124,8 +106,10 @@
   </body>
 </html>
 
+<!--Funciones necesarias:-->
 <script>
 function atras(){
+    $('#tituloCabeceraPrincipal').html('PRL');
     $('#basic_map').css('display','block');   
     $('#onlineOffline').css('display','block'); 
 
@@ -134,50 +118,60 @@ function atras(){
     $('#modoOffline').css('display','none'); 
     $('#form').css('display','none'); 
 }
-function modoOffline(){
-    $('#onlOffl').val('0');
-    $('#modoOffline').css('display','block');    
-    $('#modoOnline').css('display','none'); 
-
+function modoNav(zona){ 
+    $('#seleccionObra').val('0');
+    $('#obraName').val('');
     $('#onlineOffline').css('display','none'); 
     $('#basic_map').css('display','none');  
-      
+    if(zona==1){
+        $('#tituloCabeceraPrincipal').html('PRL -- OFFLINE');
+        $('#onlOffl').val('0');
+        $('#modoOffline').css('display','block');    
+        $('#modoOnline').css('display','none'); 
+    }else{
+        $('#tituloCabeceraPrincipal').html('PRL -- ONLINE');
+        $('#onlOffl').val('1');
+        $('#modoOnline').css('display','block');
+        $('#modoOffline').css('display','none');
+    }
 }
-
-function modoOnline(){
-    $('#onlOffl').val('1');
-    $('#modoOnline').css('display','block');
-    $('#modoOffline').css('display','none');
-
-    $('#onlineOffline').css('display','none'); 
-    $('#basic_map').css('display','none');  
-}
-
 function abreNuevoForm(){
     if($('#onlOffl').val()==0){
+        //Offline
         $('#nuevoNombreForm').css('display','block');
         $('#modoOffline').css('display','none');
+        $('#modoOnline').css('display','none'); 
+        $('#onlineOffline').css('display','none');    
     }else{
-        $('obraNombre').val($('#seleccionObra').val()); 
-        $('#form').css('display','block'); 
-        $('#obraName').val($('#seleccionObra').val());
-        window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, onRequestFileSystemSuccess, null);
+        //Online
+        if($('#seleccionObra').val()==0){
+            alert('Debe seleccionar una obra');
+        }else{
+            $('obraNombre').val($('#seleccionObra').val()); 
+            $('#form').css('display','block'); 
+            $('#obraName').val($('#seleccionObra').val());
+            window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, onRequestFileSystemSuccess, null);
+            $('#modoOnline').css('display','none'); 
+            $('#onlineOffline').css('display','none');    
+        }
     }
-    $('#modoOnline').css('display','none'); 
-    $('#onlineOffline').css('display','none');    
 }
 
 function guardaFormTmp(){
-    $('#modoOnline').css('display','none'); 
-    $('#onlineOffline').css('display','none'); 
-    $('#nuevoNombreForm').css('display','none'); 
-    $('#form').css('display','block');  
-    window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, onRequestFileSystemSuccess, null); 
-    
-    //Mostramos el form con el nombre:
-    $('#nombreFormularioTmp').html('');
-    $('#nombreFormularioTmp').html('FORMULARIO: '+nombreObra);
-    $('#form').css('display','block'); 
+    alert($('#obraName').val());
+    if($('#obraName').val()=="Crear Nueva Revision"){
+        alert('Debe darle un nombre a la nueva revision');
+    }else{
+        $('#modoOnline').css('display','none'); 
+        $('#onlineOffline').css('display','none'); 
+        $('#nuevoNombreForm').css('display','none'); 
+        $('#form').css('display','block');  
+        window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, onRequestFileSystemSuccess, null);     
+        //Mostramos el form con el nombre:
+        $('#nombreFormularioTmp').html('');
+        $('#nombreFormularioTmp').html('FORMULARIO: '+nombreObra);
+        $('#form').css('display','block'); 
+    }   
 }
 
 /**********CREAR DIRECTORIO************/
@@ -185,13 +179,35 @@ function onRequestFileSystemSuccess(fileSystem) {
     var nombreObra = $('#obraName').val();
     nombreObra = nombreObra.replace(/\s/g,"_");
     nombreObra += '_0001';
+    $('#obraName').val(nombreObra);
     var entry=fileSystem.root; 
-    entry.getDirectory('0_0001', {create: true, exclusive: false}, onGetDirectorySuccess, onGetDirectoryFail);
+    entry.getDirectory(nombreObra, {create: true, exclusive: false}, onGetDirectorySuccess, onGetDirectoryFail);
 } 
 function onGetDirectorySuccess(dir) { 
     alert("Created dir "+dir.fullPath); 
     $('#carpetaTmpName').val(dir.fullPath);
+    //Copiamos el formRespuestas.xml a esta nueva carpeta para empezar a rellenar:
+    copyFile(dir);
 } 
+/******* COPIAR XML DE RESPUESTAS A NUESTRA CARPETA TEMPORAL ******/
+
+function correctaCopiaXml(entry) {
+    console.log("New Path: " + entry.fullPath);
+}
+
+function falloCopiaXml(error) {
+    alert(error.code);
+}
+
+function copyFile(entry) {
+    
+    var ruta = $('#obraName').val();
+    // copy the file to a new directory and rename it
+    entry.copyTo(ruta, "formRespuestas"+ruta+".xml", correctaCopiaXml, falloCopiaXml);
+}
+
+
+
 function onGetDirectoryFail(error) { 
     alert("Error creating directory "+error.code); 
 } 
@@ -212,4 +228,19 @@ function fsFail(error) {
 function todoOK(resp){
     alert('resp->'+resp);
 }
+/*
+$( document ).ready(function() {
+   $.get("/formulario_PRL.xml", function (xml) {
+        $(xml).find("apartado").each(function () {
+     
+           var seccion = $(this).find('seccion').text();
+           var pregunta = $(this).find('pregunta').text();
+           var etiqueta = $(this).find('etiqueta').text();
+     
+           //alert('seccion->'+seccion+' pregunta->'+pregunta+' etiqueta->'+etiqueta);
+        });
+    });
+});
+*/
+
 </script>
