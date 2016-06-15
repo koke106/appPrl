@@ -276,30 +276,25 @@ function fail(error) {
     alert('error'+error.code);
 }
 
-
-
 function success(parent) {
-    console.log("Parent Name: " + parent.name);
+    alert("Parent Name: " + parent.name);
 }
 
 
 
-$( document ).ready(function() {
-
-   
-
-// Retrieve an existing directory, or create it if it does not already exist
-    
-    entry.getDirectory("prueba_0001", {create: true, exclusive: false}, success, fail);
-
+$( document ).ready(function() {  
+    alert('entro 1');
+    entry.getDirectory("//prueba_0001/", {create: true, exclusive: false}, success, fail);
 
     //copyFile('formulario_PRL.xml');
 
-    $.get("/formulario_PRL.xml", function (xml) {
+    /*$.get("/formulario_PRL.xml", function (xml) {
         //Copiarlo a la ruta adecuada:
         ///sdcard/prueba_0001/
        
         $(xml).find("apartado").each(function () {
+
+            //Aplicar a las diferentes secciones del XML:
      
            var seccion = $(this).find('seccion').text();
            var pregunta = $(this).find('pregunta').text();
@@ -307,8 +302,8 @@ $( document ).ready(function() {
      
            alert('seccion->'+seccion+' pregunta->'+pregunta+' etiqueta->'+etiqueta);
         });
-    });
-    });
+    });*/
+});
 
 
 </script>
