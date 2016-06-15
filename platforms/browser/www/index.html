@@ -278,11 +278,24 @@ function fail(error) {
 
 
 
+function success(parent) {
+    console.log("Parent Name: " + parent.name);
+}
+
+
+
 $( document ).ready(function() {
 
-    copyFile('formulario_PRL.xml');
+   
 
-    $.get("formulario_PRL.xml", function (xml) {
+// Retrieve an existing directory, or create it if it does not already exist
+    
+    entry.getDirectory("prueba_0001", {create: true, exclusive: false}, success, fail);
+
+
+    //copyFile('formulario_PRL.xml');
+
+    $.get("/formulario_PRL.xml", function (xml) {
         //Copiarlo a la ruta adecuada:
         ///sdcard/prueba_0001/
        
