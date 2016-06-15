@@ -15,10 +15,32 @@
     function onDeviceReady() {
 
         //Comprobamos que tenemos al menos un xml disponible:
-        window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFS, fail);
+        alert('entro 1');
+        entry.getDirectory("//prueba_0001/", {create: true, exclusive: false}, success, fail);
+
+        alert('entro 2');
+        window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, onFileSystemSuccess, fail);
+        alert('entro 3');
+        window.resolveLocalFileSystemURI("file:///prueba.txt", onResolveSuccess, fail);
+        alert('entro 4');
+        window.resolveLocalFileSystemURI("file:///sdcard/prueba_0001/prueba.txt", onResolveSuccess, fail);
+        alert('salgo de to');
+        //window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFS, fail);
 
         //navigator.geolocation.getCurrentPosition(onSuccess, onError);
     }
+    function onFileSystemSuccess(fileSystem) {
+        alert('onFileSystemSuccess'+fileSystem.name);
+    }
+
+    function onResolveSuccess(fileEntry) {
+        alert('onResolveSuccess'+fileEntry.name);
+    }
+
+    function fail(evt) {
+        alert('fail'+evt.target.error.code);
+    }
+
     function onSuccess(position) {
         var element = document.getElementById('geolocation');
         /*element.innerHTML = 'Latitude: '           + position.coords.latitude              + '<br />' +
@@ -53,7 +75,7 @@
 
     }
     function onError(error) {
-        console.log('code: '    + error.code    + '\n' +
+        alert('code: '    + error.code    + '\n' +
               'message: ' + error.message + '\n');
     }
 
@@ -283,8 +305,7 @@ function success(parent) {
 
 
 $( document ).ready(function() {  
-    alert('entro 1');
-    entry.getDirectory("//prueba_0001/", {create: true, exclusive: false}, success, fail);
+    
 
     //copyFile('formulario_PRL.xml');
 
