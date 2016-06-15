@@ -186,7 +186,7 @@ function onGetDirectorySuccess(dir) {
     alert("Created dir "+dir.fullPath); 
     $('#carpetaTmpName').val(dir.fullPath);
     //Copiamos el formRespuestas.xml a esta nueva carpeta para empezar a rellenar:
-    copyFile(dir.fullPath);
+    copyFile('/formulario_PRL.xml');
 } 
 /******* COPIAR XML DE RESPUESTAS A NUESTRA CARPETA TEMPORAL ******/
 
@@ -227,7 +227,7 @@ function fsFail(error) {
 function todoOK(resp){
     alert('resp->'+resp);
 }
-/*
+
 $( document ).ready(function() {
    $.get("/formulario_PRL.xml", function (xml) {
         $(xml).find("apartado").each(function () {
@@ -236,10 +236,10 @@ $( document ).ready(function() {
            var pregunta = $(this).find('pregunta').text();
            var etiqueta = $(this).find('etiqueta').text();
      
-           //alert('seccion->'+seccion+' pregunta->'+pregunta+' etiqueta->'+etiqueta);
+           alert('seccion->'+seccion+' pregunta->'+pregunta+' etiqueta->'+etiqueta);
         });
     });
 });
-*/
+
 
 </script>
