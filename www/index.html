@@ -16,15 +16,10 @@
 
         //Comprobamos que tenemos al menos un xml disponible:
         alert('entro 1');
-        entry.getDirectory("//prueba_0001/", {create: true, exclusive: false}, success, fail);
-
-        alert('entro 2');
-        window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, onFileSystemSuccess, fail);
-        alert('entro 3');
-        window.resolveLocalFileSystemURI("file:///prueba.txt", onResolveSuccess, fail);
-        alert('entro 4');
-        window.resolveLocalFileSystemURI("file:///sdcard/prueba_0001/prueba.txt", onResolveSuccess, fail);
-        alert('salgo de to');
+        window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, onRequestFileSystemSuccess, null);
+        /*alert('entro 2++');
+        var entry=fileSystem.root; */
+        
         //window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFS, fail);
 
         //navigator.geolocation.getCurrentPosition(onSuccess, onError);
@@ -200,18 +195,33 @@ function guardaFormTmp(){
 }
 
 /**********CREAR DIRECTORIO************/
-function onRequestFileSystemSuccess(fileSystem) {     
+function onRequestFileSystemSuccess(fileSystem) {   
+    alert('entro request'+fileSystem);  
     var nombreObra = $('#obraName').val();
     nombreObra = nombreObra.replace(/\s/g,"_");
     nombreObra += '_0001';
-    var entry=fileSystem.root; 
-    entry.getDirectory(nombreObra, {create: true, exclusive: false}, onGetDirectorySuccess, onGetDirectoryFail);
+    /*
+    fileSystem.getDirectory("//prueba_0001/", {create: true, exclusive: false}, success, fail);
+
+    alert('entro 2');
+    window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, onFileSystemSuccess, fail);
+    alert('entro 3');
+    window.resolveLocalFileSystemURI("file:///prueba.txt", onResolveSuccess, fail);
+    alert('entro 4');
+    window.resolveLocalFileSystemURI("file:///sdcard/prueba_0001/prueba.txt", onResolveSuccess, fail);
+    alert('salgo de to');*/
+    var entry=fileSystem.root;
+
+    // copy the file to a new directory and rename it
+    entry.copyTo(entry, "file.txt", onGetDirectorySuccess, onGetDirectoryFail);
+
 } 
 function onGetDirectorySuccess(dir) { 
     alert("Created dir "+dir.fullPath); 
     $('#carpetaTmpName').val(dir.fullPath);
     //Copiamos el formRespuestas.xml a esta nueva carpeta para empezar a rellenar:
     alert('llamammos al copye file con '+dir.fullPath);
+    
     copyFile(dir.fullPath);
 
 } 
@@ -227,15 +237,16 @@ function falloCopiaXml(error) {
 
 function copyFile(entry) {
     
+
+
     alert('viene con entry: '+entry);
     var ruta = $('#carpetaTmpName').val();
     alert('entro y pongo ruta: '+ruta);
-    var entry = '/sdcard/prueba_0001/prueba.txt';
+
     alert('entry: '+entry);
     // file:///android_asset/www/index.html
     // file:///android_asset/www/formulario_PRL.xml
     // copy the file to a new directory and rename it
-    entry.copyTo('file:///sdcard/prueba/', "pruebas01.txt", correctaCopiaXml, falloCopiaXml);
 }
 
 
