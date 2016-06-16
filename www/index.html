@@ -62,7 +62,7 @@
 <!--Funciones necesarias:-->
 <script>
 
-//window.appRootDirName = "com.nokia.appPrl";
+//
 document.addEventListener("deviceready", onDeviceReady, false);
 
 //    /storage/emulated/0/prueba_0001
@@ -71,8 +71,12 @@ function onDeviceReady() {
     alert('1');
     storage = window.localStorage;               
     alert('el storage este es: '+storage);
+    window.appRootDirName = "com.nokia.appPrl";
+    alert('paso app rotdir');
     window.requestFileSystem  = window.requestFileSystem || window.webkitRequestFileSystem;
+    alert('paso requestFileSystem');
     window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFS, fail);
+    alert('paso requestFileSystem2');
 }
 
 function gotFS(fileSystem) {
