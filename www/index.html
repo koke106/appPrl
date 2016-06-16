@@ -62,8 +62,10 @@
 <!--Funciones necesarias:-->
 <script>
 
-window.appRootDirName = ".myapp";
+window.appRootDirName = "com.nokia.appPrl";
 document.addEventListener("deviceready", onDeviceReady, false);
+
+//    /storage/emulated/0/prueba_0001
 
 function onDeviceReady() {
     alert('1');
@@ -85,8 +87,30 @@ function dirReady(entry) {
     alert('entre del DIRREADY:'+entry);
     window.appRootDir = entry;
     alert(JSON.stringify(window.appRootDir));
+    alert('vamos al copy');
+    copyFile('/storage/emulated/0/prueba_0001');
 
 }
+
+function win(entry) {
+    console.log("New Path: " + entry.fullPath);
+}
+
+function failCopy(error) {
+    alert(error.code);
+}
+
+function copyFile(entry) {
+    alert('entro con'+entry);
+
+    var parent = document.getElementById('parent').value,
+        parentName = parent.substring(parent.lastIndexOf('/')+1),
+        parentEntry = new DirectoryEntry(parentName, parent);
+
+    // copy the file to a new directory and rename it
+    entry.copyTo(parentEntry, "file.copy", success, failCopy);
+}
+
 
 
 function onSuccess(position) {
