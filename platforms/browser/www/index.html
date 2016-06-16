@@ -61,10 +61,12 @@
 
 <!--Funciones necesarias:-->
 <script>
+
 window.appRootDirName = ".myapp";
 document.addEventListener("deviceready", onDeviceReady, false);
 
 function onDeviceReady() {
+    alert('1');
     storage = window.localStorage;               
     alert('el storage este es: '+storage);
     window.requestFileSystem  = window.requestFileSystem || window.webkitRequestFileSystem;
@@ -83,6 +85,7 @@ function dirReady(entry) {
     alert('entre del DIRREADY:'+entry);
     window.appRootDir = entry;
     alert(JSON.stringify(window.appRootDir));
+
 }
 
 
