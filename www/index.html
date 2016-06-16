@@ -8,73 +8,6 @@
     <!---  VALOR APIKEY: AIzaSyCTj2UDMMYLM28CcqpQBGmycxMeUslXbRE --> 
     <!--<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTj2UDMMYLM28CcqpQBGmycxMeUslXbRE"></script>
     <script src="https://rawgit.com/HPNeo/gmaps/master/gmaps.js"></script>-->
-  
-<script type="text/javascript">
-    document.addEventListener("deviceready", onDeviceReady, false);
-
-    function onDeviceReady() {
-
-        //Comprobamos que tenemos al menos un xml disponible:
-        alert('entro 1');
-        window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, onRequestFileSystemSuccess, null);
-        /*alert('entro 2++');
-        var entry=fileSystem.root; */
-        
-        //window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFS, fail);
-
-        //navigator.geolocation.getCurrentPosition(onSuccess, onError);
-    }
-    function onFileSystemSuccess(fileSystem) {
-        alert('onFileSystemSuccess'+fileSystem.name);
-    }
-
-    function onResolveSuccess(fileEntry) {
-        alert('onResolveSuccess'+fileEntry.name);
-    }
-
-    function fail(evt) {
-        alert('fail'+evt.target.error.code);
-    }
-
-    function onSuccess(position) {
-        var element = document.getElementById('geolocation');
-        /*element.innerHTML = 'Latitude: '           + position.coords.latitude              + '<br />' +
-                            'Longitude: '          + position.coords.longitude             + '<br />' +
-                            'Altitude: '           + position.coords.altitude              + '<br />' +
-                            'Accuracy: '           + position.coords.accuracy              + '<br />' +
-                            'Altitude Accuracy: '  + position.coords.altitudeAccuracy      + '<br />' +
-                            'Heading: '            + position.coords.heading               + '<br />' +
-                            'Speed: '              + position.coords.speed                 + '<br />' +
-                            'Timestamp: '          + position.timestamp                    + '<br />';
-
-        /*var map = new GMaps({
-                div: '#basic_map',
-                lat: position.coords.latitude,
-                lng: position.coords.longitude,
-                width: '500px',
-                height: '500px',
-                zoom: 12,
-                zoomControl: true,
-                
-                zoomControlOpt: {
-                    style: 'SMALL',
-                    position: 'TOP_LEFT'
-                },
-                panControl: false
-        });
-        map.addMarker({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-            title: 'Yo',
-        });*/
-
-    }
-    function onError(error) {
-        alert('code: '    + error.code    + '\n' +
-              'message: ' + error.message + '\n');
-    }
-
-    </script>
   </head>
   <body style="position: relative; margin:0 auto; text-align: center; width: 100%; background-color:#B0A88B; ">
     <div id="cabecera">
@@ -128,6 +61,70 @@
 
 <!--Funciones necesarias:-->
 <script>
+window.appRootDirName = ".myapp";
+document.addEventListener("deviceready", onDeviceReady, false);
+
+function onDeviceReady() {
+    storage = window.localStorage;               
+    alert('el storage este es: '+storage);
+    window.requestFileSystem  = window.requestFileSystem || window.webkitRequestFileSystem;
+    window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFS, fail);
+}
+
+function gotFS(fileSystem) {
+    alert("got filesystem"+fileSystem);
+    alert("filesystem got");
+    fileSystem.root.getDirectory(window.appRootDirName, {create : true,exclusive : false},dirReady, fail);
+}
+function fail(evt) {
+    alert('fail'+evt.target.error.code);
+} 
+function dirReady(entry) {
+    alert('entre del DIRREADY:'+entry);
+    window.appRootDir = entry;
+    alert(JSON.stringify(window.appRootDir));
+}
+
+
+function onSuccess(position) {
+    alert('succes de onSuccess:'+position)
+    //var element = document.getElementById('geolocation');
+    /*element.innerHTML = 'Latitude: '           + position.coords.latitude              + '<br />' +
+                        'Longitude: '          + position.coords.longitude             + '<br />' +
+                        'Altitude: '           + position.coords.altitude              + '<br />' +
+                        'Accuracy: '           + position.coords.accuracy              + '<br />' +
+                        'Altitude Accuracy: '  + position.coords.altitudeAccuracy      + '<br />' +
+                        'Heading: '            + position.coords.heading               + '<br />' +
+                        'Speed: '              + position.coords.speed                 + '<br />' +
+                        'Timestamp: '          + position.timestamp                    + '<br />';
+
+    /*var map = new GMaps({
+            div: '#basic_map',
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+            width: '500px',
+            height: '500px',
+            zoom: 12,
+            zoomControl: true,
+            
+            zoomControlOpt: {
+                style: 'SMALL',
+                position: 'TOP_LEFT'
+            },
+            panControl: false
+    });
+    map.addMarker({
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+        title: 'Yo',
+    });*/
+
+}
+
+function onError(error) {
+    alert('code: '    + error.code    + '\n' + 'message: ' + error.message + '\n');
+}
+
 function atras(){
     $('#tituloCabeceraPrincipal').html('PRL');
     $('#basic_map').css('display','block');   
@@ -176,7 +173,6 @@ function abreNuevoForm(){
         }
     }
 }
-
 function guardaFormTmp(){
     alert($('#obraName').val());
     if($('#obraName').val()=="Crear Nueva Revision"){
@@ -195,65 +191,15 @@ function guardaFormTmp(){
 }
 
 /**********CREAR DIRECTORIO************/
-function onRequestFileSystemSuccess(fileSystem) {   
+ /*function onRequestFileSystemSuccess(fileSystem) {   
     alert('entro request'+fileSystem);  
     var nombreObra = $('#obraName').val();
     nombreObra = nombreObra.replace(/\s/g,"_");
     nombreObra += '_0001';
-    /*
+   
     fileSystem.getDirectory("//prueba_0001/", {create: true, exclusive: false}, success, fail);
+ }*/
 
-    alert('entro 2');
-    window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, onFileSystemSuccess, fail);
-    alert('entro 3');
-    window.resolveLocalFileSystemURI("file:///prueba.txt", onResolveSuccess, fail);
-    alert('entro 4');
-    window.resolveLocalFileSystemURI("file:///sdcard/prueba_0001/prueba.txt", onResolveSuccess, fail);
-    alert('salgo de to');*/
-    var entry=fileSystem.root;
-
-    // copy the file to a new directory and rename it
-    entry.copyTo(entry, "file.txt", onGetDirectorySuccess, onGetDirectoryFail);
-
-} 
-function onGetDirectorySuccess(dir) { 
-    alert("Created dir "+dir.fullPath); 
-    $('#carpetaTmpName').val(dir.fullPath);
-    //Copiamos el formRespuestas.xml a esta nueva carpeta para empezar a rellenar:
-    alert('llamammos al copye file con '+dir.fullPath);
-    
-    copyFile(dir.fullPath);
-
-} 
-/******* COPIAR XML DE RESPUESTAS A NUESTRA CARPETA TEMPORAL ******/
-
-function correctaCopiaXml(entry) {
-    alert("New Path: " + entry.fullPath);
-}
-
-function falloCopiaXml(error) {
-    alert(error.code);
-}
-
-function copyFile(entry) {
-    
-
-
-    alert('viene con entry: '+entry);
-    var ruta = $('#carpetaTmpName').val();
-    alert('entro y pongo ruta: '+ruta);
-
-    alert('entry: '+entry);
-    // file:///android_asset/www/index.html
-    // file:///android_asset/www/formulario_PRL.xml
-    // copy the file to a new directory and rename it
-}
-
-
-
-function onGetDirectoryFail(error) { 
-    alert("Error creating directory "+error.code); 
-} 
 
 /************CAMARA DE FOTOS**********/
 function abreCamaraFoto() {
@@ -261,58 +207,13 @@ function abreCamaraFoto() {
 }
 function onPhotoURISuccess(imageURI) {
     alert('imageURI->'+imageURI);
-    var carpetaDest = $('#carpetaTmpName').val();
+    /*var carpetaDest = $('#carpetaTmpName').val();
     alert('carpetaDest->'+carpetaDest);
-    imageURI.moveTo(carpetaDest, 'img000123.jpg', todoOK, fsFail);
+    imageURI.moveTo(carpetaDest, 'img000123.jpg', todoOK, fsFail);*/
 }
 function fsFail(error) {
     alert('failed with error code: ' + error.code);
 }
-function todoOK(resp){
-    alert('resp->'+resp);
-}
-
-
-/**********TEST***************/
-function gotFS(fileSystem) {
-    fileSystem.root.getFile("formulario_PRL.xml", null, gotFileEntry, fail);
-}
-
-function gotFileEntry(fileEntry) {
-    fileEntry.file(gotFile, fail);
-}
-
-function gotFile(file){
-    readDataUrl(file);
-    readAsText(file);
-}
-
-function readDataUrl(file) {
-    var reader = new FileReader();
-    reader.onloadend = function(evt) {
-        alert("Read as data URL");
-        alert(evt.target.result);
-    };
-    reader.readAsDataURL(file);
-}
-
-function readAsText(file) {
-    var reader = new FileReader();
-    reader.onloadend = function(evt) {
-        alert("Read as text");
-        alert(evt.target.result);
-    };
-    reader.readAsText(file);
-}
-
-function fail(error) {
-    alert('error'+error.code);
-}
-
-function success(parent) {
-    alert("Parent Name: " + parent.name);
-}
-
 
 
 $( document ).ready(function() {  
