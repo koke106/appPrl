@@ -75,9 +75,9 @@ function onDeviceReady() {
     alert('paso app rotdir');
     window.requestFileSystem  = window.requestFileSystem || window.webkitRequestFileSystem;
     alert('paso requestFileSystem');
-    alert(fileSystem.name);
+    /*alert(fileSystem.name);
     window.requestFileSystem(LocalFileSystem, 0, gotFS, fail);
-    alert('paso requestFileSystem2');
+    alert('paso requestFileSystem2');*/
     window.resolveLocalFileSystemURI("file:///prueba_0001/prueba.txt", onSuccess, onError);
     alert('paso resolveLocalFileSystemURI');
 }
