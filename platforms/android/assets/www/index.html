@@ -62,64 +62,53 @@
 <!--Funciones necesarias:-->
 <script>
 
-//
 document.addEventListener("deviceready", onDeviceReady, false);
 
-//    /storage/emulated/0/prueba_0001
 
-function onDeviceReady() {
-    alert('1');
-    storage = window.localStorage;               
-    alert('el storage este es: '+storage);
-    window.appRootDirName = "com.nokia.appPrl";
-    alert('paso app rotdir');
-    window.requestFileSystem  = window.requestFileSystem || window.webkitRequestFileSystem;
-    alert('paso requestFileSystem');
-    //alert('filename'+fileSystem.name);
-    //window.requestFileSystem(LocalFileSystem., 0, gotFS, fail);
-    alert('paso requestFileSystem2');
-
-    window.resolveLocalFileSystemURI("file:///prueba.txt", onSuccess, onError);
-    alert('paso resolveLocalFileSystemURI');
-}
-
-function gotFS(fileSystem) {
-    alert("got filesystem"+fileSystem);
-    alert("filesystem got");
-    fileSystem.root.getDirectory(window.appRootDirName, {create : true,exclusive : false},dirReady, fail);
-}
-function fail(evt) {
-    alert('fail'+evt.target.error.code);
-} 
-function dirReady(entry) {
-    alert('entre del DIRREADY:'+entry);
-    window.appRootDir = entry;
-    alert(JSON.stringify(window.appRootDir));
-    alert('vamos al copy');
-    copyFile('/storage/emulated/0/prueba_0001');
+function populateDB(tx) {
+    tx.executeSql('CREATE TABLE IF NOT EXISTS formulario (id unique, id_pregunta, pregunta, respuestas, categoria, si_continua, no_continua, np_continua, accion, proyecto)');
+    tx.executeSql("INSERT INTO formulario (id, id_pregunta, pregunta, respuestas, categoria, si_continua, no_continua, np_continua, accion, proyecto) VALUES (1, '1.1', 'Se dispone en la obra de Plan de Seguridad y Salud / Plan de Medidas Preventivas de los trabajos', 'SI/NO' , 'Documentación' , '2.1', '2.1', '', '', '1')");
+    tx.executeSql("INSERT INTO formulario (id, id_pregunta, pregunta, respuestas, categoria, si_continua, no_continua, np_continua, accion, proyecto) VALUES (2, '2.1', 'El espacio de trabajo está limpio y ordenado', 'SI/NO/NP' , 'Lugar de trabajo/Orden y limpieza' , '2.2', '2.2', '2.2', 'NO/foto_obligatoria', '1')");
+    tx.executeSql("INSERT INTO formulario (id, id_pregunta, pregunta, respuestas, categoria, si_continua, no_continua, np_continua, accion, proyecto) VALUES (3, '2.2', 'Estan delimitadas las zonas de trabajo de las zonas de transito', 'SI/NO/NP' , 'Orden y limpieza' , '2.3', '2.3', '2.3', 'NO/foto_obligatoria', '1')");
+    tx.executeSql("INSERT INTO formulario (id, id_pregunta, pregunta, respuestas, categoria, si_continua, no_continua, np_continua, accion, proyecto) VALUES (4, '2.3', 'Los acopios de  material tienen zona reservada, el material se apila de forma estable y en zona firme, dejando libre la zona de circulación de vehiculos y/o zona de paso de peatones', 'SI/NO/NP' , 'Orden y limpieza' , '2.4', '2.4', '2.4', 'NO/foto_obligatoria', '1')");
 
 }
 
-function win(entry) {
-    console.log("New Path: " + entry.fullPath);
+function querySuccess(tx, results) {
+    var len = results.rows.length;
+    alert("formulario table: " + len + " rows found.");
+    for (var i=0; i<len; i++){
+        alert("Row = " + i + " ID = " + results.rows.item(i).id + 
+            " id_pregunta =  " + results.rows.item(i).id_pregunta + 
+            " pregunta =  " + results.rows.item(i).pregunta + 
+            " respuestas =  " + results.rows.item(i).respuestas + 
+            " categoria =  " + results.rows.item(i).categoria + 
+            " si_continua =  " + results.rows.item(i).si_continua + 
+            " no_continua =  " + results.rows.item(i).no_continua + 
+            " np_continua =  " + results.rows.item(i).np_continua + 
+            " accion =  " + results.rows.item(i).accion + 
+            " proyecto =  " + results.rows.item(i).proyecto);
+    }
 }
 
-function failCopy(error) {
-    alert(error.code);
+function errorCB(err) {
+    if(err.code==6){
+        alert('ya existe la DB');
+        successCB();
+    }else{
+        alert("Error processing SQL: "+err.message);
+    }
 }
 
-function copyFile(entry) {
-    alert('entro con'+entry);
-
-    var parent = document.getElementById('parent').value,
-        parentName = parent.substring(parent.lastIndexOf('/')+1),
-        parentEntry = new DirectoryEntry(parentName, parent);
-
-    // copy the file to a new directory and rename it
-    entry.copyTo(parentEntry, "file.copy", success, failCopy);
+function successCB() {
+    alert('abrir');
+    var db = window.openDatabase("prlDB", "1.0", "Base de datos PRL", 80000000);
+    db.transaction(queryDB, errorCB);
 }
-
-
+ 
+function queryDB(tx) {
+        tx.executeSql('SELECT * FROM formulario', [], querySuccess, errorCB);
+    }
 
 function onSuccess(position) {
     alert('succes de onSuccess:'+position)
@@ -154,10 +143,6 @@ function onSuccess(position) {
         title: 'Yo',
     });*/
 
-}
-
-function onError(error) {
-    alert('code: '    + error.code    + '\n' + 'message: ' + error.message + '\n');
 }
 
 function atras(){
@@ -225,17 +210,6 @@ function guardaFormTmp(){
     }   
 }
 
-/**********CREAR DIRECTORIO************/
- /*function onRequestFileSystemSuccess(fileSystem) {   
-    alert('entro request'+fileSystem);  
-    var nombreObra = $('#obraName').val();
-    nombreObra = nombreObra.replace(/\s/g,"_");
-    nombreObra += '_0001';
-   
-    fileSystem.getDirectory("//prueba_0001/", {create: true, exclusive: false}, success, fail);
- }*/
-
-
 /************CAMARA DE FOTOS**********/
 function abreCamaraFoto() {
     navigator.camera.getPicture(onPhotoURISuccess, fsFail, { quality: 50, destinationType: Camera.DestinationType.FILE_URI });
@@ -251,30 +225,11 @@ function fsFail(error) {
 }
 
 
-$( document ).ready(function() {  
-    
-    alert('document ready');
-    onDeviceReady();
-    alert('ya ha llamado');
+function onDeviceReady() {
+    var db = window.openDatabase("prlDB", "1.0", "Base de datos PRL", 80000000);
+    db.transaction(populateDB, errorCB, successCB);
+}
 
-    //copyFile('formulario_PRL.xml');
-
-    /*$.get("/formulario_PRL.xml", function (xml) {
-        //Copiarlo a la ruta adecuada:
-        ///sdcard/prueba_0001/
-       
-        $(xml).find("apartado").each(function () {
-
-            //Aplicar a las diferentes secciones del XML:
-     
-           var seccion = $(this).find('seccion').text();
-           var pregunta = $(this).find('pregunta').text();
-           var etiqueta = $(this).find('etiqueta').text();
-     
-           alert('seccion->'+seccion+' pregunta->'+pregunta+' etiqueta->'+etiqueta);
-        });
-    });*/
-});
 
 
 </script>
