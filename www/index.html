@@ -101,8 +101,7 @@ function errorCB(err) {
 }
 
 function successCB() {
-    alert('abrir');
-    var db = window.openDatabase("prlDB", "1.0", "Base de datos PRL", 80000000);
+    var db = window.openDatabase("prlDB", "1.0", "Base de datos PRL", 10000000);
     db.transaction(queryDB, errorCB);
 }
  
@@ -226,10 +225,8 @@ function fsFail(error) {
 
 
 function onDeviceReady() {
-    var db = window.openDatabase("prlDB", "1.0", "Base de datos PRL", 80000000);
+    alert('dvRdy');
+    var db = window.openDatabase("prlDB", "1.0", "Base de datos PRL", 10000000);
     db.transaction(populateDB, errorCB, successCB);
 }
-
-
-
 </script>
