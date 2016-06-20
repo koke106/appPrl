@@ -62,87 +62,192 @@
 <!--Funciones necesarias:-->
 <script>
 
-document.addEventListener("deviceready", onDeviceReady, false);
-
-
-function populateDB(tx) {
-    tx.executeSql('CREATE TABLE IF NOT EXISTS formulario (id unique, id_pregunta, pregunta, respuestas, categoria, si_continua, no_continua, np_continua, accion, proyecto)');
-    tx.executeSql("INSERT INTO formulario (id, id_pregunta, pregunta, respuestas, categoria, si_continua, no_continua, np_continua, accion, proyecto) VALUES (1, '1.1', 'Se dispone en la obra de Plan de Seguridad y Salud / Plan de Medidas Preventivas de los trabajos', 'SI/NO' , 'Documentación' , '2.1', '2.1', '', '', '1')");
-    tx.executeSql("INSERT INTO formulario (id, id_pregunta, pregunta, respuestas, categoria, si_continua, no_continua, np_continua, accion, proyecto) VALUES (2, '2.1', 'El espacio de trabajo está limpio y ordenado', 'SI/NO/NP' , 'Lugar de trabajo/Orden y limpieza' , '2.2', '2.2', '2.2', 'NO/foto_obligatoria', '1')");
-    tx.executeSql("INSERT INTO formulario (id, id_pregunta, pregunta, respuestas, categoria, si_continua, no_continua, np_continua, accion, proyecto) VALUES (3, '2.2', 'Estan delimitadas las zonas de trabajo de las zonas de transito', 'SI/NO/NP' , 'Orden y limpieza' , '2.3', '2.3', '2.3', 'NO/foto_obligatoria', '1')");
-    tx.executeSql("INSERT INTO formulario (id, id_pregunta, pregunta, respuestas, categoria, si_continua, no_continua, np_continua, accion, proyecto) VALUES (4, '2.3', 'Los acopios de  material tienen zona reservada, el material se apila de forma estable y en zona firme, dejando libre la zona de circulación de vehiculos y/o zona de paso de peatones', 'SI/NO/NP' , 'Orden y limpieza' , '2.4', '2.4', '2.4', 'NO/foto_obligatoria', '1')");
-
+//document.addEventListener("deviceready", actualizaDB, false);
+/**************DATABASE*****************/
+function abreBaseDeDatos(){
+    alert('abreBaseDeDatos');
+    var db = window.openDatabase("prlDB", "1.0", "Base de datos PRL", 10000000);
+    db.transaction(dameVersionFormActual, errorCB, versionCorrecta);    
 }
+function dameVersionFormActual(tx){
+    alert('dameVersionFormActual->'+tx);
+    tx.executeSql('SELECT version_form FROM proyectos_app WHERE id=1', [],versionCorrecta, errorCB );
+}
+function versionCorrecta(tx, results) {
+    alert('versionCorrecta');
+    var len = results.rows.length;
+    alert('len->'+len);
+    for (var i=0; i<len; i++){
+        alert("version form = " + results.rows.item(i).version_form);
+        var versionMvl = results.rows.item(i).version_form;       
+    }
+    $.post( "http://www.alu-ftth.com/appPrl/dameFormActualizado.php", { proyecto:'1', zona:'0'})
+    .done(function( data ) {
+        alert('data del post->'+data);
+        data=2;
+        if(data!=versionMvl){
+            alert('dif versiones..compruebo si tengo la tabla y la borro y la creo entera de 0.');
+            crearTablaForm();
+        }else{
+         alert('misma version...acaba aqui, pinto form;');
+        }
+    });
+}
+function errorCB(err) {
+    alert("Error processing SQL: '"+err.message+"' error code: '"+err.code+"'");
+    if(err.code==0){
+        alert('entroEnCreaTabla');
+        var db = window.openDatabase("prlDB", "1.0", "Base de datos PRL", 10000000);
+        db.transaction(crearTablaForm, erroForm, actualizaTablaFormAlDia);
+    }
+}
+function erroForm(err) {
+    alert("Error form SQL: '"+err.message+"' error code: '"+err.code+"'");
+    if(err.code==5){
+        var db = window.openDatabase("prlDB", "1.0", "Base de datos PRL", 10000000);
+        db.transaction(crearTablaFormTable, errorCB, actualizaTablaFormAlDia);
+    }
+    
+}
+function crearTablaVersion(tx){
+    alert('crearTablaVersion');
+    tx.executeSql('DROP TABLE proyectos_app');
+    tx.executeSql('CREATE TABLE IF NOT EXISTS proyectos_app (id unique, nombre, descripcion, version_form)');
+    tx.executeSql("INSERT INTO proyectos_app (id, nombre, descripcion, version_form) VALUES (1,'appPRL','Aplicación para el seguimiento de obras de PRL','1')");
+}
+function crearTablaForm(){
+    alert('crearTablaForm');
+    var db = window.openDatabase("prlDB", "1.0", "Base de datos PRL", 10000000);
+    db.transaction(borraTablaForm, erroForm, crearTablaFormTable);
+}
+function borraTablaForm(tx){
+    alert('borraTablaForm');
+    tx.executeSql('DELETE TABLE formulario');
+    
+}
+function crearTablaFormTable(tx){
+    alert('crearTablaFormTable');
+    tx.executeSql('CREATE TABLE IF NOT EXISTS formulario (id unique, id_pregunta, pregunta, respuestas, categoria, si_continua, no_continua, np_continua, accion, proyecto)');
+}
+function grabaRegistroForm(id,idPregunta,pregunta,respuestas,categoria,siContinua,noContinua,npContinua,accion,proyecto) {
+    alert('crearTablaFormTable');
+   /*var contador = id.length
+    alert('contador tenemos:'+contador);
+    for (i=0;i<contador;i++){
+        alert("INSERT INTO formulario (id, id_pregunta, pregunta, respuestas, categoria, si_continua, no_continua, np_continua, accion, proyecto) VALUES ("+id[i]+",'"+idPregunta[i]+"','"+pregunta[i]+"','"+respuestas[i]+"','"+categoria[i]+"','"+siContinua[i]+"','"+noContinua[i]+"','"+npContinua[i]+"','"+accion[i]+"','"+proyecto[i]+"'')");
+    }   */
 
+    alert("INSERT INTO formulario (id, id_pregunta, pregunta, respuestas, categoria, si_continua, no_continua, np_continua, accion, proyecto) VALUES ("+id+",'"+idPregunta+"','"+pregunta+"','"+respuestas+"','"+categoria+"','"+siContinua+"','"+noContinua+"','"+npContinua+"','"+accion+"','"+proyecto+"'')");
+    
+
+    /*var idTmp = id[0];
+    var preguntaTmp = pregunta[0];*/
+    alert('grabaRegistroForm-->'+id+' \n pr-->'+pregunta);
+}
+function actualizaTablaFormAlDia(tx){
+    alert('crearTablaForm');
+    var db = window.openDatabase("prlDB", "1.0", "Base de datos PRL", 10000000);
+    $.post( "http://www.alu-ftth.com/appPrl/dameFormActualizado.php", { proyecto:'1', zona:'1'})
+        .done(function( data ) {
+            console.log(data);
+            var completas = data.split("},");
+            var contador = completas.length
+            alert('contador en post'+contador);
+            for (i=0;i<contador;i++){
+                var parteCompleta = completas[i].split(',');
+                var ids = parteCompleta[0].split(':');
+                if(i==0){
+                    var idLimpio = ids[0].replace('[{"id"', 'id');
+                }else{
+                    var idLimpio = ids[0].replace('{"id"', 'id');
+                }              
+                var respId = ids[1].replace("\"", "");
+                var respId = respId.replace("\"", "");
+                //console.log('parte1->'+parteCompleta[1]);
+                var idsPregunta = parteCompleta[1].split(':');
+                var idPregLimpio = idsPregunta[0].replace('"id_pregunta"', 'id_pregunta');
+                var respIdPreg = idsPregunta[1].replace("\"", "");
+                var respIdPreg = respIdPreg.replace("\"", "");
+                //console.log('parte2->'+parteCompleta[2]);
+                var preguntaCompleta = parteCompleta[2].split(':');
+                var prgLimpia = preguntaCompleta[0].replace('"pregunta"', 'pregunta');
+                var respPregnt = preguntaCompleta[1].replace("\"", "");
+                var respPregnt = respPregnt.replace("\"", "");
+                //console.log('parte3->'+parteCompleta[3]);
+                var respuestasCompleta = parteCompleta[3].split(':');
+                var rspLmpia = respuestasCompleta[0].replace('"respuestas"', 'respuestas');
+                var respPrgnCompe = respuestasCompleta[1].replace("\"", "");
+                var respPrgnCompe = respPrgnCompe.replace("\"", "");
+                //console.log('parte2->'+parteCompleta[4]);
+                var catCompleta = parteCompleta[4].split(':');
+                var catLimpia = catCompleta[0].replace('"categoria"', 'categoria');
+                var catRspLmpia = catCompleta[1].replace("\"", "");
+                var catRspLmpia = catRspLmpia.replace("\"", "");
+                //console.log('parte2->'+parteCompleta[2]);
+                var contCompleta = parteCompleta[5].split(':');
+                var cntLmpia = contCompleta[0].replace('"si_continua"', 'si_continua');
+                var contRsp = contCompleta[1].replace("\"", "");
+                var contRsp = contRsp.replace("\"", "");
+                //console.log('parte2->'+parteCompleta[2]);
+                var noContCompleta = parteCompleta[6].split(':');
+                var noContLimpia = noContCompleta[0].replace('"no_continua"', 'no_continua');
+                var nocontResp = noContCompleta[1].replace("\"", "");
+                var nocontResp = nocontResp.replace("\"", "");
+                //console.log('parte2->'+parteCompleta[2]);
+                var npContiComplta = parteCompleta[7].split(':');
+                var npCntniaLmpia = npContiComplta[0].replace('"np_continua"', 'np_continua');
+                var npContResp = npContiComplta[1].replace("\"", "");
+                var npContResp = npContResp.replace("\"", "");
+                //console.log('parte2->'+parteCompleta[2]);
+                var accionCompleta = parteCompleta[8].split(':');
+                var accLimpia = accionCompleta[0].replace('"accion"', 'accion');
+                var accResp = accionCompleta[1].replace("\"", "");
+                var accResp = accResp.replace("\"", "");
+                //console.log('parte2->'+parteCompleta[2]);
+                var proyectoCompleto = parteCompleta[9].split(':');
+                var proyLimpio = proyectoCompleto[0].replace('"proyecto"', 'proyecto');
+                var proyecResp = proyectoCompleto[1].replace("\"", "");
+                var proyecResp = proyecResp.replace("\"", "");
+                db.transaction(function(tx){grabaRegistroForm(respId,respIdPreg,respPregnt,rspLmpia,catRspLmpia,contRsp,nocontResp,npContResp,accResp,proyecResp)});
+                console.log('-> '+idLimpio+' -> '+respId+'\n -> '+idPregLimpio+' -> '+respIdPreg+'\n -> '+prgLimpia+' -> '+respPregnt+'\n -> '+rspLmpia+' -> '+respPrgnCompe+'\n -> '+catLimpia+' -> '+catRspLmpia+'\n -> '+cntLmpia+' -> '+contRsp+'\n -> '+noContLimpia+' -> '+nocontResp+'\n -> '+npCntniaLmpia+' ->'+npContResp+'\n -> '+accLimpia+' ->'+accResp+'\n -> '+proyLimpio+' ->'+proyecResp);
+            }
+            
+    });
+}
+function actualizadoOK(tx, results) {
+    alert('actualizadoOK');
+    var len = results.rows.length;
+    alert('len->'+len);
+    for (var i=0; i<len; i++){
+        alert("id form = " + results.rows.item(i).id);
+        alert("pregunta form = " + results.rows.item(i).pregunta);
+    }
+}
 function querySuccess(tx, results) {
+    alert("querySuccess");
     var len = results.rows.length;
     alert("formulario table: " + len + " rows found.");
-    for (var i=0; i<len; i++){
-        alert("Row = " + i + " ID = " + results.rows.item(i).id + 
-            " id_pregunta =  " + results.rows.item(i).id_pregunta + 
-            " pregunta =  " + results.rows.item(i).pregunta + 
-            " respuestas =  " + results.rows.item(i).respuestas + 
-            " categoria =  " + results.rows.item(i).categoria + 
-            " si_continua =  " + results.rows.item(i).si_continua + 
-            " no_continua =  " + results.rows.item(i).no_continua + 
-            " np_continua =  " + results.rows.item(i).np_continua + 
-            " accion =  " + results.rows.item(i).accion + 
-            " proyecto =  " + results.rows.item(i).proyecto);
-    }
-}
-
-function errorCB(err) {
-    if(err.code==6){
-        alert('ya existe la DB');
-        successCB();
+    if(len=='0'){
+        alert('len corta...');
+        actualizaFila('1','1.8','blablabla');
     }else{
-        alert("Error processing SQL: "+err.message);
-    }
-}
+        for (var i=0; i<len; i++){
+            alert("Row = " + i + " ID = " + results.rows.item(i).id + 
+                " id_pregunta =  " + results.rows.item(i).id_pregunta + 
+                " pregunta =  " + results.rows.item(i).pregunta + 
+                " respuestas =  " + results.rows.item(i).respuestas + 
+                " categoria =  " + results.rows.item(i).categoria + 
+                " si_continua =  " + results.rows.item(i).si_continua + 
+                " no_continua =  " + results.rows.item(i).no_continua + 
+                " np_continua =  " + results.rows.item(i).np_continua + 
+                " accion =  " + results.rows.item(i).accion + 
+                " proyecto =  " + results.rows.item(i).proyecto);
+        }
 
-function successCB() {
-    var db = window.openDatabase("prlDB", "1.0", "Base de datos PRL", 10000000);
-    db.transaction(queryDB, errorCB);
+    }
 }
  
-function queryDB(tx) {
-        tx.executeSql('SELECT * FROM formulario', [], querySuccess, errorCB);
-    }
 
-function onSuccess(position) {
-    alert('succes de onSuccess:'+position)
-    //var element = document.getElementById('geolocation');
-    /*element.innerHTML = 'Latitude: '           + position.coords.latitude              + '<br />' +
-                        'Longitude: '          + position.coords.longitude             + '<br />' +
-                        'Altitude: '           + position.coords.altitude              + '<br />' +
-                        'Accuracy: '           + position.coords.accuracy              + '<br />' +
-                        'Altitude Accuracy: '  + position.coords.altitudeAccuracy      + '<br />' +
-                        'Heading: '            + position.coords.heading               + '<br />' +
-                        'Speed: '              + position.coords.speed                 + '<br />' +
-                        'Timestamp: '          + position.timestamp                    + '<br />';
-
-    /*var map = new GMaps({
-            div: '#basic_map',
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-            width: '500px',
-            height: '500px',
-            zoom: 12,
-            zoomControl: true,
-            
-            zoomControlOpt: {
-                style: 'SMALL',
-                position: 'TOP_LEFT'
-            },
-            panControl: false
-    });
-    map.addMarker({
-        lat: position.coords.latitude,
-        lng: position.coords.longitude,
-        title: 'Yo',
-    });*/
-
-}
 
 function atras(){
     $('#tituloCabeceraPrincipal').html('PRL');
@@ -165,6 +270,7 @@ function modoNav(zona){
         $('#modoOffline').css('display','block');    
         $('#modoOnline').css('display','none'); 
     }else{
+        actualizaDB();
         $('#tituloCabeceraPrincipal').html('PRL -- ONLINE');
         $('#onlOffl').val('1');
         $('#modoOnline').css('display','block');
@@ -224,9 +330,46 @@ function fsFail(error) {
 }
 
 
-function onDeviceReady() {
-    alert('dvRdy');
-    var db = window.openDatabase("prlDB", "1.0", "Base de datos PRL", 10000000);
-    db.transaction(populateDB, errorCB, successCB);
+
+function onSuccess(position) {
+    alert('succes de onSuccess:'+position)
+    //var element = document.getElementById('geolocation');
+    /*element.innerHTML = 'Latitude: '           + position.coords.latitude              + '<br />' +
+                        'Longitude: '          + position.coords.longitude             + '<br />' +
+                        'Altitude: '           + position.coords.altitude              + '<br />' +
+                        'Accuracy: '           + position.coords.accuracy              + '<br />' +
+                        'Altitude Accuracy: '  + position.coords.altitudeAccuracy      + '<br />' +
+                        'Heading: '            + position.coords.heading               + '<br />' +
+                        'Speed: '              + position.coords.speed                 + '<br />' +
+                        'Timestamp: '          + position.timestamp                    + '<br />';
+
+    /*var map = new GMaps({
+            div: '#basic_map',
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+            width: '500px',
+            height: '500px',
+            zoom: 12,
+            zoomControl: true,
+            
+            zoomControlOpt: {
+                style: 'SMALL',
+                position: 'TOP_LEFT'
+            },
+            panControl: false
+    });
+    map.addMarker({
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+        title: 'Yo',
+    });*/
+
+
 }
+
+
+$(window).load(function() {
+    abreBaseDeDatos();    
+});
+
 </script>
