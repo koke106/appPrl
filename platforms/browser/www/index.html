@@ -84,26 +84,27 @@ function versionCorrecta(tx, results) {
     alert('len->'+len);
     for (var i=0; i<len; i++){
         alert("version form = " + results.rows.item(i).version_form);
-        var versionMvl = results.rows.item(i).version_form;       
+        var versionMvl = results.rows.item(i).version_form;     
+        $.post( "http://www.alu-ftth.com/appPrl/dameFormActualizado.php", { proyecto:'1', zona:'0'})
+        .done(function( data ) {
+            alert('data del post->'+data);
+            data=2;
+            if(data!=versionMvl){
+                alert('dif versiones..compruebo si tengo la tabla y la borro y la creo entera de 0.');
+                crearTablaForm();
+            }else{
+             alert('misma version...acaba aqui, pinto form;');
+            }
+        });  
     }
-    $.post( "http://www.alu-ftth.com/appPrl/dameFormActualizado.php", { proyecto:'1', zona:'0'})
-    .done(function( data ) {
-        alert('data del post->'+data);
-        data=2;
-        if(data!=versionMvl){
-            alert('dif versiones..compruebo si tengo la tabla y la borro y la creo entera de 0.');
-            crearTablaForm();
-        }else{
-         alert('misma version...acaba aqui, pinto form;');
-        }
-    });
+    
 }
 function errorCB(err) {
     alert("Error processing SQL: '"+err.message+"' error code: '"+err.code+"'");
     if(err.code==0){
         alert('ee1');
         var db = window.openDatabase("prlDB", "", "Base de datos PRL", 1024*1024);
-        db.transaction(crearTablaForm, erroForm, actualizaTablaFormAlDia);
+        db.transaction(crearTablaVersion, erroForm, actualizaTablaFormAlDia);
     }else if(err.code==undefined){
         alert('ee0');
         var db = window.openDatabase("prlDB", "", "Base de datos PRL", 1024*1024);
@@ -115,11 +116,11 @@ function erroForm(err) {
     if(err.code==5){
         alert('ef1');
         var db = window.openDatabase("prlDB", "", "Base de datos PRL", 1024*1024);
-        db.transaction(crearTablaFormTable, errorCB, actualizaTablaFormAlDia);
+        db.transaction(crearTablaVersion, errorCB, actualizaTablaFormAlDia);
     }else{
         alert('ef2');
         var db = window.openDatabase("prlDB", "", "Base de datos PRL", 1024*1024);
-        db.transaction(crearTablaFormTable, errorCB, actualizaTablaFormAlDia);
+        db.transaction(crearTablaVersion, errorCB, actualizaTablaFormAlDia);
     }
     
 }
@@ -145,17 +146,9 @@ function crearTablaFormTable(tx){
 }
 function grabaRegistroForm(id,idPregunta,pregunta,respuestas,categoria,siContinua,noContinua,npContinua,accion,proyecto) {
     alert('crearTablaFormTable');
-   /*var contador = id.length
-    alert('contador tenemos:'+contador);
-    for (i=0;i<contador;i++){
-        alert("INSERT INTO formulario (id, id_pregunta, pregunta, respuestas, categoria, si_continua, no_continua, np_continua, accion, proyecto) VALUES ("+id[i]+",'"+idPregunta[i]+"','"+pregunta[i]+"','"+respuestas[i]+"','"+categoria[i]+"','"+siContinua[i]+"','"+noContinua[i]+"','"+npContinua[i]+"','"+accion[i]+"','"+proyecto[i]+"'')");
-    }   */
 
     alert("INSERT INTO formulario (id, id_pregunta, pregunta, respuestas, categoria, si_continua, no_continua, np_continua, accion, proyecto) VALUES ("+id+",'"+idPregunta+"','"+pregunta+"','"+respuestas+"','"+categoria+"','"+siContinua+"','"+noContinua+"','"+npContinua+"','"+accion+"','"+proyecto+"'')");
     
-
-    /*var idTmp = id[0];
-    var preguntaTmp = pregunta[0];*/
     alert('grabaRegistroForm-->'+id+' \n pr-->'+pregunta);
 }
 function actualizaTablaFormAlDia(tx){
@@ -167,7 +160,7 @@ function actualizaTablaFormAlDia(tx){
             var completas = data.split("},");
             var contador = completas.length
             alert('contador en post'+contador);
-            for (i=0;i<contador;i++){
+            for (var i=0;i<contador;i++){
                 var parteCompleta = completas[i].split(',');
                 var ids = parteCompleta[0].split(':');
                 if(i==0){
