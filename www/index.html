@@ -62,12 +62,17 @@
 <!--Funciones necesarias:-->
 <script>
 
-//document.addEventListener("deviceready", actualizaDB, false);
+document.addEventListener("deviceready", abreBaseDeDatos, false);
 /**************DATABASE*****************/
 function abreBaseDeDatos(){
     alert('abreBaseDeDatos');
-    var db = window.openDatabase("prlDB", "1.0", "Base de datos PRL", 10000000);
-    db.transaction(dameVersionFormActual, errorCB, versionCorrecta);    
+    //var db = window.openDatabase("prlDB", "1.0", "Base de datos PRL", 10000000);
+    var db = window.openDatabase("prlDB", "", "Base de datos PRL", 1024*1024);
+    if (db == null) {
+        alert ("Database not found DB: " + db);
+    }else{
+        db.transaction(dameVersionFormActual, errorCB, versionCorrecta);   
+    } 
 }
 function dameVersionFormActual(tx){
     alert('dameVersionFormActual->'+tx);
@@ -369,7 +374,7 @@ function onSuccess(position) {
 
 
 $(window).load(function() {
-    abreBaseDeDatos();    
+    alert('a');
 });
 
 </script>
