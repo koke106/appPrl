@@ -66,7 +66,7 @@ document.addEventListener("deviceready", abreBaseDeDatos, false);
 /**************DATABASE*****************/
 function abreBaseDeDatos(){
     alert('abreBaseDeDatos');
-    //var db = window.openDatabase("prlDB", "1.0", "Base de datos PRL", 1024*1024);
+    //var db = window.openDatabase("prlDB", "", "Base de datos PRL", 1024*1024);
     var db = window.openDatabase("prlDB", "", "Base de datos PRL", 1024*1024);
     if (db == null) {
         alert ("Database not found DB: " + db);
@@ -101,19 +101,22 @@ function versionCorrecta(tx, results) {
 function errorCB(err) {
     alert("Error processing SQL: '"+err.message+"' error code: '"+err.code+"'");
     if(err.code==0){
-        alert('entroEnCreaTabla');
-        var db = window.openDatabase("prlDB", "1.0", "Base de datos PRL", 1024*1024);
+        alert('ee1');
+        var db = window.openDatabase("prlDB", "", "Base de datos PRL", 1024*1024);
         db.transaction(crearTablaForm, erroForm, actualizaTablaFormAlDia);
     }else if(err.code==undefined){
-        alert('entroEnCreaTabla');
-        var db = window.openDatabase("prlDB", "1.0", "Base de datos PRL", 1024*1024);
+        alert('ee0');
+        var db = window.openDatabase("prlDB", "", "Base de datos PRL", 1024*1024);
         db.transaction(crearTablaVersion, erroForm, actualizaTablaFormAlDia);
     }
 }
 function erroForm(err) {
     alert("Error form SQL: '"+err.message+"' error code: '"+err.code+"'");
     if(err.code==5){
-        var db = window.openDatabase("prlDB", "1.0", "Base de datos PRL", 1024*1024);
+        var db = window.openDatabase("prlDB", "", "Base de datos PRL", 1024*1024);
+        db.transaction(crearTablaFormTable, errorCB, actualizaTablaFormAlDia);
+    }else{
+        var db = window.openDatabase("prlDB", "", "Base de datos PRL", 1024*1024);
         db.transaction(crearTablaFormTable, errorCB, actualizaTablaFormAlDia);
     }
     
@@ -126,7 +129,7 @@ function crearTablaVersion(tx){
 }
 function crearTablaForm(){
     alert('crearTablaForm');
-    var db = window.openDatabase("prlDB", "1.0", "Base de datos PRL", 1024*1024);
+    var db = window.openDatabase("prlDB", "", "Base de datos PRL", 1024*1024);
     db.transaction(borraTablaForm, erroForm, crearTablaFormTable);
 }
 function borraTablaForm(tx){
@@ -155,7 +158,7 @@ function grabaRegistroForm(id,idPregunta,pregunta,respuestas,categoria,siContinu
 }
 function actualizaTablaFormAlDia(tx){
     alert('crearTablaForm');
-    var db = window.openDatabase("prlDB", "1.0", "Base de datos PRL", 1024*1024);
+    var db = window.openDatabase("prlDB", "", "Base de datos PRL", 1024*1024);
     $.post( "http://www.alu-ftth.com/appPrl/dameFormActualizado.php", { proyecto:'1', zona:'1'})
         .done(function( data ) {
             console.log(data);
