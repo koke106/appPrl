@@ -113,9 +113,11 @@ function errorCB(err) {
 function erroForm(err) {
     alert("Error form SQL: '"+err.message+"' error code: '"+err.code+"'");
     if(err.code==5){
+        alert('ef1');
         var db = window.openDatabase("prlDB", "", "Base de datos PRL", 1024*1024);
         db.transaction(crearTablaFormTable, errorCB, actualizaTablaFormAlDia);
     }else{
+        alert('ef2');
         var db = window.openDatabase("prlDB", "", "Base de datos PRL", 1024*1024);
         db.transaction(crearTablaFormTable, errorCB, actualizaTablaFormAlDia);
     }
@@ -123,9 +125,9 @@ function erroForm(err) {
 }
 function crearTablaVersion(tx){
     alert('crearTablaVersion');
-    tx.executeSql('DROP TABLE IF EXISTS proyectos_app');
     tx.executeSql('CREATE TABLE IF NOT EXISTS proyectos_app (id unique, nombre, descripcion, version_form)');
     tx.executeSql("INSERT INTO proyectos_app (id, nombre, descripcion, version_form) VALUES (1,'appPRL','Aplicación para el seguimiento de obras de PRL','1')");
+    tx.executeSql('CREATE TABLE IF NOT EXISTS formulario (id unique, id_pregunta, pregunta, respuestas, categoria, si_continua, no_continua, np_continua, accion, proyecto)');
 }
 function crearTablaForm(){
     alert('crearTablaForm');
@@ -157,7 +159,7 @@ function grabaRegistroForm(id,idPregunta,pregunta,respuestas,categoria,siContinu
     alert('grabaRegistroForm-->'+id+' \n pr-->'+pregunta);
 }
 function actualizaTablaFormAlDia(tx){
-    alert('crearTablaForm');
+    alert('actualizaTablaFormAlDia');
     var db = window.openDatabase("prlDB", "", "Base de datos PRL", 1024*1024);
     $.post( "http://www.alu-ftth.com/appPrl/dameFormActualizado.php", { proyecto:'1', zona:'1'})
         .done(function( data ) {
@@ -221,7 +223,7 @@ function actualizaTablaFormAlDia(tx){
                 var proyecResp = proyectoCompleto[1].replace("\"", "");
                 var proyecResp = proyecResp.replace("\"", "");
                 db.transaction(function(tx){grabaRegistroForm(respId,respIdPreg,respPregnt,rspLmpia,catRspLmpia,contRsp,nocontResp,npContResp,accResp,proyecResp)});
-                console.log('-> '+idLimpio+' -> '+respId+'\n -> '+idPregLimpio+' -> '+respIdPreg+'\n -> '+prgLimpia+' -> '+respPregnt+'\n -> '+rspLmpia+' -> '+respPrgnCompe+'\n -> '+catLimpia+' -> '+catRspLmpia+'\n -> '+cntLmpia+' -> '+contRsp+'\n -> '+noContLimpia+' -> '+nocontResp+'\n -> '+npCntniaLmpia+' ->'+npContResp+'\n -> '+accLimpia+' ->'+accResp+'\n -> '+proyLimpio+' ->'+proyecResp);
+                alert('-> '+idLimpio+' -> '+respId+'\n -> '+idPregLimpio+' -> '+respIdPreg+'\n -> '+prgLimpia+' -> '+respPregnt+'\n -> '+rspLmpia+' -> '+respPrgnCompe+'\n -> '+catLimpia+' -> '+catRspLmpia+'\n -> '+cntLmpia+' -> '+contRsp+'\n -> '+noContLimpia+' -> '+nocontResp+'\n -> '+npCntniaLmpia+' ->'+npContResp+'\n -> '+accLimpia+' ->'+accResp+'\n -> '+proyLimpio+' ->'+proyecResp);
             }
             
     });
