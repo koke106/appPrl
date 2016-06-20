@@ -107,7 +107,7 @@ function errorCB(err) {
     }else if(err.code==undefined){
         alert('entroEnCreaTabla');
         var db = window.openDatabase("prlDB", "1.0", "Base de datos PRL", 1024*1024);
-        db.transaction(crearTablaForm, erroForm, actualizaTablaFormAlDia);
+        db.transaction(crearTablaVersion, erroForm, actualizaTablaFormAlDia);
     }
 }
 function erroForm(err) {
@@ -120,7 +120,7 @@ function erroForm(err) {
 }
 function crearTablaVersion(tx){
     alert('crearTablaVersion');
-    tx.executeSql('DROP TABLE proyectos_app');
+    tx.executeSql('DROP TABLE IF EXISTS proyectos_app');
     tx.executeSql('CREATE TABLE IF NOT EXISTS proyectos_app (id unique, nombre, descripcion, version_form)');
     tx.executeSql("INSERT INTO proyectos_app (id, nombre, descripcion, version_form) VALUES (1,'appPRL','Aplicación para el seguimiento de obras de PRL','1')");
 }
@@ -131,7 +131,7 @@ function crearTablaForm(){
 }
 function borraTablaForm(tx){
     alert('borraTablaForm');
-    tx.executeSql('DELETE TABLE formulario');
+    tx.executeSql('DROP TABLE IF EXISTS formulario');
     
 }
 function crearTablaFormTable(tx){
