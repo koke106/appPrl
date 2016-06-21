@@ -1,0 +1,80 @@
+<script type="text/javascript" charset="utf-8">
+
+var db;
+var shortName = 'prl';
+var version = '1.0';
+var displayName = 'dbPrl';
+var maxSize = 65535;
+
+// this is called when an error happens in a transaction
+function errorHandler(transaction, error) {
+   alert('Error: ' + error.message + ' code: ' + error.code);
+}
+
+// this is called when a successful transaction happens
+function successCallBack() {
+   alert("DEBUGGING: success");
+}
+
+function nullHandler(){};
+// called when the application loads
+
+function onBodyLoad(){
+
+alert("DEBUGGING: we are in the onBodyLoad() function");
+
+ if (!window.openDatabase) {
+   alert('Databases are not supported in this browser.');
+   return;
+ }
+
+ 	db = openDatabase(shortName, version, displayName,maxSize);
+ 	db.transaction(function(tx){
+	    tx.executeSql('CREATE TABLE IF NOT EXISTS proyectos_app (id unique, nombre, descripcion, version_form)',[],nullHandler,errorHandler);
+	    
+	    tx.executeSql('CREATE TABLE IF NOT EXISTS formulario (id unique, id_pregunta, pregunta, respuestas, categoria, si_continua, no_continua, np_continua, accion, proyecto)',[],nullHandler,errorHandler);
+	},errorHandler,successCallBack);
+
+}
+
+function ListDBValues() {
+
+	if (!window.openDatabase) {
+		alert('Databases are not supported in this browser.');
+	return;
+	}
+
+	db.transaction(function(transaction) {
+		transaction.executeSql('SELECT * FROM proyectos_app;', [], function(transaction, result) {
+			if (result != null && result.rows != null) {
+				for (var i = 0; i < result.rows.length; i++) {
+					var row = result.rows.item(i);
+					alert('id->'+row.id+' version_form->'+row.version_form+' nombre-> '+row.nombre);
+				}
+			}
+		},errorHandler);
+	},errorHandler,nullHandler);
+
+	return;
+
+}
+
+function AddValueToDB() {
+
+ if (!window.openDatabase) {
+   alert('Databases are not supported in this browser.');
+   return;
+ }
+
+
+	db.transaction(function(transaction) {
+		transaction.executeSql("INSERT INTO proyectos_app (id, nombre, descripcion, version_form) VALUES (2,'appPRL','Aplicación para el seguimiento de obras de PRL','2')",[],nullHandler,errorHandler);
+		//transaction.executeSql('INSERT INTO User(FirstName, LastName) VALUES (?,?)',[$('#txFirstName').val(), $('#txLastName').val()],nullHandler,errorHandler);
+	});
+
+	ListDBValues();
+
+	return false;
+
+}
+</script>

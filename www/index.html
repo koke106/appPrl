@@ -79,7 +79,7 @@ function errorHandler(transaction, error) {
    $('#formularioXML').html('');
     if(error.code=='5'){
         alert('No tiene el formulario, debe conectarse en modo online para descargarlo.');
-        onBodyLoad();
+        //onBodyLoad();        
     }else if(error.code=='6'){
         console.log('Error: ' + error.message + ' code: ' + error.code);
     }else{
