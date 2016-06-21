@@ -47,7 +47,9 @@
             <input id="revOnln" type="button" name="Nueva Revisi&oacute;n" value="Nueva Revisi&oacute;n" onclick="abreNuevoForm();" style="margin-top:1em; position:relative; margin:0 auto; text-align:center; background-color:transparent; border-radius: 4px; border:0; box-shadow: inset 0 0 0 2px #36c; color:#36c !important; font-size: 1em; font-weight: 600; letter-spacing: 0.15em; height: 3.5em; line-height: 3.45em; overflow: hidden; text-decoration: none; text-transform: uppercase;">
         </div>
         <!--Pinta Formulario a partir del xml:-->
-        <div id="formularioXML" style="display:none;" ></div>
+        <div id="formularioXML" style="display:none;" >
+            
+        </div>
     </div>
 
     <div id="pie"></div>
@@ -72,6 +74,12 @@ var maxSize = 65535;
 // this is called when an error happens in a transaction
 function errorHandler(transaction, error) {
    alert('Error: ' + error.message + ' code: ' + error.code);
+   $('#formularioXML').css('display','none');
+   $('#formularioXML').html('');
+    if(error.code==5){
+        alert('No tiene el formulario, debe conectarse en modo online para descargarlo.');
+        onBodyLoad();
+    }
 }
 // this is called when a successful transaction happens
 function successCallBack() {
@@ -127,20 +135,20 @@ function ListDBValues() {
 }
 
 function listDBForm() {
-    if (!window.openDatabase) {
-        alert('Databases are not supported in this browser.');
-    return;
-    } 
+    alert("DEBUGGING listDBForm: we are in the onBodyLoad() function");    
     db = openDatabase(shortName, version, displayName,maxSize);
-    db.transaction(function(transaction){
-        transaction.executeSql('SELECT * FROM formulario;', [], function(transaction, result) {
+    db.transaction(function(tx){
+        tx.executeSql('SELECT * FROM formulario;', [], function(tx, result) {
             if (result != null && result.rows != null) {
                 for (var i = 0; i < result.rows.length; i++) {
                     var row = result.rows.item(i);
                     alert('id->'+row.id+' pregunta->'+row.pregunta+' respuestas-> '+row.respuestas);
+                    $('#formularioXML').css('display','block');
+                    $('#formularioXML').append('ID:'+row.id+' Id Pregunta:'+row.id_pregunta+' Pregunta:'+row.pregunta+'Respuesta: '+row.respuestas+' Categoria: '+row.categoria+' Si_Continua: '+row.si_continua+' No_Continua: '+row.no_continua+' Np_Continua: '+row.np_continua+' Accion: '+row.accion+' Proyecto: '+row.proyecto+'<br/>');
                 }
             }else{
                 alert('No tiene el formulario, debe conectarse en modo online para descargarlo.');
+                onBodyLoad();
             }
         },errorHandler);
     },errorHandler,nullHandler);
@@ -172,10 +180,12 @@ function actualizaDatosForm(versionMvl) {
                 alert('contador en post'+contador);
                 //Borro la tabla y la creo vacia:
                 transaction.executeSql('DROP TABLE formulario',[],nullHandler,errorHandler);
-                transaction.executeSql('UPDATE proyectos_app SET version_form=? WHERE id=1',[versionMvl],nullHandler,errorHandler);
+                transaction.executeSql('UPDATE proyectos_app SET version_form=9 WHERE id=1',[],nullHandler,errorHandler);
+                //transaction.executeSql('UPDATE proyectos_app SET version_form=? WHERE id=1',[versionMvl],nullHandler,errorHandler);
                 transaction.executeSql('CREATE TABLE IF NOT EXISTS formulario (id unique, id_pregunta, pregunta, respuestas, categoria, si_continua, no_continua, np_continua, accion, proyecto)',[],nullHandler,errorHandler);
                 for (var i=0;i<contador;i++){
-                    var parteCompleta = completas[i].split(',');
+                    var parteCompleta = completas[i].split('","');
+                    //console.log('\n\n PARTE COMPLETA:'+i+' DATOS: '+parteCompleta[0]+parteCompleta[1]+parteCompleta[2]+parteCompleta[3]+parteCompleta[4]+parteCompleta[5]+parteCompleta[6]+parteCompleta[7]+parteCompleta[8]+parteCompleta[9]);
                     var ids = parteCompleta[0].split(':');
                     if(i==0){
                         var idLimpio = ids[0].replace('[{"id"', 'id');
@@ -189,15 +199,19 @@ function actualizaDatosForm(versionMvl) {
                     var idPregLimpio = idsPregunta[0].replace('"id_pregunta"', 'id_pregunta');
                     var respIdPreg = idsPregunta[1].replace("\"", "");
                     var respIdPreg = respIdPreg.replace("\"", "");
-                    //console.log('parte2->'+parteCompleta[2]);
+
+                    console.log('\nparte2->'+parteCompleta[2]);
                     var preguntaCompleta = parteCompleta[2].split(':');
                     var prgLimpia = preguntaCompleta[0].replace('"pregunta"', 'pregunta');
                     var respPregnt = preguntaCompleta[1].replace("\"", "");
                     var respPregnt = respPregnt.replace("\"", "");
-                    //console.log('parte3->'+parteCompleta[3]);
+
+                    console.log('parte3Completa:->'+parteCompleta[3]);
                     var respuestasCompleta = parteCompleta[3].split(':');
-                    var rspLmpia = respuestasCompleta[0].replace('"respuestas"', 'respuestas');
+                    var rspLmpia = respuestasCompleta[0].replace('"respuestas"', 'respuesta');  
+                    console.log('respt:->'+respuestasCompleta[1]);                  
                     var respPrgnCompe = respuestasCompleta[1].replace("\"", "");
+                    console.log('resptLimpiadno:->'+respPrgnCompe);   
                     var respPrgnCompe = respPrgnCompe.replace("\"", "");
                     //console.log('parte2->'+parteCompleta[4]);
                     var catCompleta = parteCompleta[4].split(':');
@@ -230,7 +244,7 @@ function actualizaDatosForm(versionMvl) {
                     var proyecResp = proyectoCompleto[1].replace("\"", "");
                     var proyecResp = proyecResp.replace("\"", "");
         
-                    transaction.executeSql('INSERT INTO formulario (id, id_pregunta, pregunta, respuestas, categoria, si_continua, no_continua, np_continua, accion, proyecto) VALUES (?,?,?,?,?,?,?,?,?,?)',[respId,respIdPreg, respPrgnCompe,rspLmpia,catRspLmpia,contRsp,nocontResp,npContResp,accResp,proyecResp],nullHandler,errorHandler);
+                    transaction.executeSql('INSERT INTO formulario (id, id_pregunta, pregunta, respuestas, categoria, si_continua, no_continua, np_continua, accion, proyecto) VALUES (?,?,?,?,?,?,?,?,?,?)',[respId,respIdPreg, respPregnt,respPrgnCompe,catRspLmpia,contRsp,nocontResp,npContResp,accResp,proyecResp],nullHandler,errorHandler);
 
                     //alert('-> '+idLimpio+' -> '+respId+'\n -> '+idPregLimpio+' -> '+respIdPreg+'\n -> '+prgLimpia+' -> '+respPregnt+'\n -> '+rspLmpia+' -> '+respPrgnCompe+'\n -> '+catLimpia+' -> '+catRspLmpia+'\n -> '+cntLmpia+' -> '+contRsp+'\n -> '+noContLimpia+' -> '+nocontResp+'\n -> '+npCntniaLmpia+' ->'+npContResp+'\n -> '+accLimpia+' ->'+accResp+'\n -> '+proyLimpio+' ->'+proyecResp);
                 }
@@ -239,7 +253,7 @@ function actualizaDatosForm(versionMvl) {
             
     });
 
-    listDBForm();
+    //listDBForm();
     return false;
 }
 
