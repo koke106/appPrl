@@ -241,9 +241,19 @@ function actualizaDatosForm(versionMvl) {
                     //console.log('parte2->'+parteCompleta[2]);
                     var proyectoCompleto = parteCompleta[9].split(':');
                     var proyLimpio = proyectoCompleto[0].replace('"proyecto"', 'proyecto');
-                    if (i==contador)
-                    var proyecResp = proyectoCompleto[1].replace("\"", "");
-                    var proyecResp = proyecResp.replace("\"", "");
+                    var aux = i+1;
+                    if (aux==contador){
+                        console.log('contador = i '+proyectoCompleto[1]);
+                        var proyecResp = proyectoCompleto[1].replace("}]","");
+
+                        console.log('proyecResp 1 '+proyecResp);
+                        var proyecResp = proyecResp.replace("\"", "");
+                        var proyecResp = proyecResp.replace("\"", "");
+                    }else{
+                        var proyecResp = proyectoCompleto[1].replace("\"", "");
+                        var proyecResp = proyecResp.replace("\"", "");
+                    }
+                    
         
                     transaction.executeSql('INSERT INTO formulario (id, id_pregunta, pregunta, respuestas, categoria, si_continua, no_continua, np_continua, accion, proyecto) VALUES (?,?,?,?,?,?,?,?,?,?)',[respId,respIdPreg, respPregnt,respPrgnCompe,catRspLmpia,contRsp,nocontResp,npContResp,accResp,proyecResp],nullHandler,errorHandler);
 
@@ -260,6 +270,8 @@ function actualizaDatosForm(versionMvl) {
 
 /******************NAVEGACION APP*********************/
 function atras(){
+    $('#formularioXML').css('display','none');
+    $('#formularioXML').html('');
     $('#tituloCabeceraPrincipal').html('PRL');
     $('#basic_map').css('display','block');   
     $('#onlineOffline').css('display','block'); 
