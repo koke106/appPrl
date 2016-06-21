@@ -60,323 +60,187 @@
 </html>
 
 <!--Funciones necesarias:-->
-<script>
+<script type="text/javascript" charset="utf-8">
+document.addEventListener("deviceready", onBodyLoad, false);
 
-document.addEventListener("deviceready", abreBaseDeDatos, false);
-/**************DATABASE*****************/
-function abreBaseDeDatos(){
-    alert('abreBaseDeDatos');
-    //var db = window.openDatabase("prlDB", "", "Base de datos PRL", 1024*1024);
-    var db = window.openDatabase("prlDB", "", "Base de datos PRL", 1024*1024);
-    if (db == null) {
-        alert ("Database not found DB: " + db);
-    }else{
-        db.transaction(dameVersionFormActual, errorCB, versionCorrecta);   
-    } 
+var db;
+var shortName = 'prl';
+var version = '1.0';
+var displayName = 'dbPrl';
+var maxSize = 65535;
+
+// this is called when an error happens in a transaction
+function errorHandler(transaction, error) {
+   alert('Error: ' + error.message + ' code: ' + error.code);
 }
-function dameVersionFormActual(tx){
-    alert('dameVersionFormActual->'+tx);
-    tx.executeSql('SELECT version_form FROM proyectos_app WHERE id=1', [],versionCorrecta, errorCB );
+// this is called when a successful transaction happens
+function successCallBack() {
+   alert("DEBUGGING: success");
+   AddValueToDB();
 }
-function versionCorrecta(tx, results) {
-    alert('versionCorrecta');
-    var len = results.rows.length;
-    alert('len->'+len);
-    for (var i=0; i<len; i++){
-        alert("version form = " + results.rows.item(i).version_form);
-        var versionMvl = results.rows.item(i).version_form;     
-        $.post( "http://www.alu-ftth.com/appPrl/dameFormActualizado.php", { proyecto:'1', zona:'0'})
-        .done(function( data ) {
-            alert('data del post->'+data);
-            data=2;
-            if(data!=versionMvl){
-                alert('dif versiones..compruebo si tengo la tabla y la borro y la creo entera de 0.');
-                crearTablaForm();
-            }else{
-             alert('misma version...acaba aqui, pinto form;');
+function nullHandler(){};
+// called when the application loads
+function onBodyLoad(){
+alert("DEBUGGING: we are in the onBodyLoad() function");
+ if (!window.openDatabase) {
+   alert('Databases are not supported in this browser.');
+   return;
+ }
+    db = openDatabase(shortName, version, displayName,maxSize);
+    db.transaction(function(tx){
+        //tx.executeSql('DROP TABLE proyectos_app',[],nullHandler,errorHandler);
+        tx.executeSql('CREATE TABLE IF NOT EXISTS proyectos_app (id unique, nombre, descripcion, version_form)',[],nullHandler,errorHandler);        
+        tx.executeSql('CREATE TABLE IF NOT EXISTS formulario (id unique, id_pregunta, pregunta, respuestas, categoria, si_continua, no_continua, np_continua, accion, proyecto)',[],nullHandler,errorHandler);
+    },errorHandler,successCallBack);
+}
+function ListDBValues() {
+    if (!window.openDatabase) {
+        alert('Databases are not supported in this browser.');
+    return;
+    }
+    db.transaction(function(transaction) {
+        transaction.executeSql('SELECT * FROM proyectos_app;', [], function(transaction, result) {
+            if (result != null && result.rows != null) {
+                for (var i = 0; i < result.rows.length; i++) {
+                    var row = result.rows.item(i);
+                    alert('id->'+row.id+' version_form->'+row.version_form+' nombre-> '+row.nombre);
+                    var versionMvl = row.id;
+                    $.post( "http://www.alu-ftth.com/appPrl/dameFormActualizado.php", { proyecto:'1', zona:'0'})
+                        .done(function( data ) {
+                            alert('data del post->'+data);
+                            data=2;
+                            if(data!=versionMvl){
+                                alert('dif versiones..compruebo si tengo la tabla y la borro y la creo entera de 0.');
+                                actualizaDatosForm();
+                            }else{
+                             alert('misma version...acaba aqui, pinto form;');
+                             return false;
+                            }
+                        });  
+                }
             }
-        });  
-    }
-    
+        },errorHandler);
+    },errorHandler,nullHandler);
+    return;
 }
-function errorCB(err) {
-    alert("Error processing SQL: '"+err.message+"' error code: '"+err.code+"'");
-    if(err.code==0){
-        alert('ee1');
-        var db = window.openDatabase("prlDB", "", "Base de datos PRL", 1024*1024);
-        db.transaction(crearTablaVersion, erroForm, actualizaTablaFormAlDia);
-    }else if(err.code==undefined){
-        alert('ee0');
-        var db = window.openDatabase("prlDB", "", "Base de datos PRL", 1024*1024);
-        db.transaction(crearTablaVersion, erroForm, actualizaTablaFormAlDia);
-    }
-}
-function erroForm(err) {
-    alert("Error form SQL: '"+err.message+"' error code: '"+err.code+"'");
-    if(err.code==5){
-        alert('ef1');
-        var db = window.openDatabase("prlDB", "", "Base de datos PRL", 1024*1024);
-        db.transaction(crearTablaVersion, errorCB, actualizaTablaFormAlDia);
-    }else{
-        alert('ef2');
-        var db = window.openDatabase("prlDB", "", "Base de datos PRL", 1024*1024);
-        db.transaction(crearTablaVersion, errorCB, actualizaTablaFormAlDia);
-    }
-    
-}
-function crearTablaVersion(tx){
-    alert('crearTablaVersion');
-    tx.executeSql('CREATE TABLE IF NOT EXISTS proyectos_app (id unique, nombre, descripcion, version_form)');
-    tx.executeSql("INSERT INTO proyectos_app (id, nombre, descripcion, version_form) VALUES (1,'appPRL','Aplicación para el seguimiento de obras de PRL','1')");
-    tx.executeSql('CREATE TABLE IF NOT EXISTS formulario (id unique, id_pregunta, pregunta, respuestas, categoria, si_continua, no_continua, np_continua, accion, proyecto)');
-}
-function crearTablaForm(){
-    alert('crearTablaForm');
-    var db = window.openDatabase("prlDB", "", "Base de datos PRL", 1024*1024);
-    db.transaction(borraTablaForm, erroForm, crearTablaFormTable);
-}
-function borraTablaForm(tx){
-    alert('borraTablaForm');
-    tx.executeSql('DROP TABLE IF EXISTS formulario');
-    
-}
-function crearTablaFormTable(tx){
-    alert('crearTablaFormTable');
-    tx.executeSql('CREATE TABLE IF NOT EXISTS formulario (id unique, id_pregunta, pregunta, respuestas, categoria, si_continua, no_continua, np_continua, accion, proyecto)');
-}
-function grabaRegistroForm(id,idPregunta,pregunta,respuestas,categoria,siContinua,noContinua,npContinua,accion,proyecto) {
-    alert('crearTablaFormTable');
 
-    alert("INSERT INTO formulario (id, id_pregunta, pregunta, respuestas, categoria, si_continua, no_continua, np_continua, accion, proyecto) VALUES ("+id+",'"+idPregunta+"','"+pregunta+"','"+respuestas+"','"+categoria+"','"+siContinua+"','"+noContinua+"','"+npContinua+"','"+accion+"','"+proyecto+"'')");
-    
-    alert('grabaRegistroForm-->'+id+' \n pr-->'+pregunta);
+function listDBForm() {
+    if (!window.openDatabase) {
+        alert('Databases are not supported in this browser.');
+    return;
+    } 
+    db.transaction(function(transaction) {
+        transaction.executeSql('SELECT * FROM formulario;', [], function(transaction, result) {
+            if (result != null && result.rows != null) {
+                for (var i = 0; i < result.rows.length; i++) {
+                    var row = result.rows.item(i);
+                    alert('id->'+row.id+' pregunta->'+row.pregunta+' respuestas-> '+row.respuestas);
+                }
+            }
+        },errorHandler);
+    },errorHandler,nullHandler);
+    return false;
 }
-function actualizaTablaFormAlDia(tx){
-    alert('actualizaTablaFormAlDia');
-    var db = window.openDatabase("prlDB", "", "Base de datos PRL", 1024*1024);
-    $.post( "http://www.alu-ftth.com/appPrl/dameFormActualizado.php", { proyecto:'1', zona:'1'})
+function AddValueToDB() {
+ if (!window.openDatabase) {
+   alert('Databases are not supported in this browser.');
+   return;
+ }
+    db.transaction(function(transaction) {
+        transaction.executeSql("INSERT INTO proyectos_app (id, nombre, descripcion, version_form) VALUES (1,'appPRL','Aplicación para el seguimiento de obras de PRL','1')",[],nullHandler,errorHandler);
+        //transaction.executeSql('INSERT INTO User(FirstName, LastName) VALUES (?,?)',[$('#txFirstName').val(), $('#txLastName').val()],nullHandler,errorHandler);
+    });
+    ListDBValues();
+    return false;
+}
+function actualizaDatosForm() {
+ if (!window.openDatabase) {
+   alert('Databases are not supported in this browser.');
+   return;
+ }
+        $.post( "http://www.alu-ftth.com/appPrl/dameFormActualizado.php", { proyecto:'1', zona:'1'})
         .done(function( data ) {
             console.log(data);
-            var completas = data.split("},");
-            var contador = completas.length
-            alert('contador en post'+contador);
-            for (var i=0;i<contador;i++){
-                var parteCompleta = completas[i].split(',');
-                var ids = parteCompleta[0].split(':');
-                if(i==0){
-                    var idLimpio = ids[0].replace('[{"id"', 'id');
-                }else{
-                    var idLimpio = ids[0].replace('{"id"', 'id');
-                }              
-                var respId = ids[1].replace("\"", "");
-                var respId = respId.replace("\"", "");
-                //console.log('parte1->'+parteCompleta[1]);
-                var idsPregunta = parteCompleta[1].split(':');
-                var idPregLimpio = idsPregunta[0].replace('"id_pregunta"', 'id_pregunta');
-                var respIdPreg = idsPregunta[1].replace("\"", "");
-                var respIdPreg = respIdPreg.replace("\"", "");
-                //console.log('parte2->'+parteCompleta[2]);
-                var preguntaCompleta = parteCompleta[2].split(':');
-                var prgLimpia = preguntaCompleta[0].replace('"pregunta"', 'pregunta');
-                var respPregnt = preguntaCompleta[1].replace("\"", "");
-                var respPregnt = respPregnt.replace("\"", "");
-                //console.log('parte3->'+parteCompleta[3]);
-                var respuestasCompleta = parteCompleta[3].split(':');
-                var rspLmpia = respuestasCompleta[0].replace('"respuestas"', 'respuestas');
-                var respPrgnCompe = respuestasCompleta[1].replace("\"", "");
-                var respPrgnCompe = respPrgnCompe.replace("\"", "");
-                //console.log('parte2->'+parteCompleta[4]);
-                var catCompleta = parteCompleta[4].split(':');
-                var catLimpia = catCompleta[0].replace('"categoria"', 'categoria');
-                var catRspLmpia = catCompleta[1].replace("\"", "");
-                var catRspLmpia = catRspLmpia.replace("\"", "");
-                //console.log('parte2->'+parteCompleta[2]);
-                var contCompleta = parteCompleta[5].split(':');
-                var cntLmpia = contCompleta[0].replace('"si_continua"', 'si_continua');
-                var contRsp = contCompleta[1].replace("\"", "");
-                var contRsp = contRsp.replace("\"", "");
-                //console.log('parte2->'+parteCompleta[2]);
-                var noContCompleta = parteCompleta[6].split(':');
-                var noContLimpia = noContCompleta[0].replace('"no_continua"', 'no_continua');
-                var nocontResp = noContCompleta[1].replace("\"", "");
-                var nocontResp = nocontResp.replace("\"", "");
-                //console.log('parte2->'+parteCompleta[2]);
-                var npContiComplta = parteCompleta[7].split(':');
-                var npCntniaLmpia = npContiComplta[0].replace('"np_continua"', 'np_continua');
-                var npContResp = npContiComplta[1].replace("\"", "");
-                var npContResp = npContResp.replace("\"", "");
-                //console.log('parte2->'+parteCompleta[2]);
-                var accionCompleta = parteCompleta[8].split(':');
-                var accLimpia = accionCompleta[0].replace('"accion"', 'accion');
-                var accResp = accionCompleta[1].replace("\"", "");
-                var accResp = accResp.replace("\"", "");
-                //console.log('parte2->'+parteCompleta[2]);
-                var proyectoCompleto = parteCompleta[9].split(':');
-                var proyLimpio = proyectoCompleto[0].replace('"proyecto"', 'proyecto');
-                var proyecResp = proyectoCompleto[1].replace("\"", "");
-                var proyecResp = proyecResp.replace("\"", "");
-                db.transaction(function(tx){grabaRegistroForm(respId,respIdPreg,respPregnt,rspLmpia,catRspLmpia,contRsp,nocontResp,npContResp,accResp,proyecResp)});
-                alert('-> '+idLimpio+' -> '+respId+'\n -> '+idPregLimpio+' -> '+respIdPreg+'\n -> '+prgLimpia+' -> '+respPregnt+'\n -> '+rspLmpia+' -> '+respPrgnCompe+'\n -> '+catLimpia+' -> '+catRspLmpia+'\n -> '+cntLmpia+' -> '+contRsp+'\n -> '+noContLimpia+' -> '+nocontResp+'\n -> '+npCntniaLmpia+' ->'+npContResp+'\n -> '+accLimpia+' ->'+accResp+'\n -> '+proyLimpio+' ->'+proyecResp);
-            }
+            db.transaction(function(transaction) {
+                var completas = data.split("},");
+                var contador = completas.length
+                alert('contador en post'+contador);
+                //Borro la tabla y la creo vacia:
+                transaction.executeSql('DROP TABLE formulario',[],nullHandler,errorHandler);
+                transaction.executeSql('CREATE TABLE IF NOT EXISTS formulario (id unique, id_pregunta, pregunta, respuestas, categoria, si_continua, no_continua, np_continua, accion, proyecto)',[],nullHandler,errorHandler);
+                for (var i=0;i<contador;i++){
+                    var parteCompleta = completas[i].split(',');
+                    var ids = parteCompleta[0].split(':');
+                    if(i==0){
+                        var idLimpio = ids[0].replace('[{"id"', 'id');
+                    }else{
+                        var idLimpio = ids[0].replace('{"id"', 'id');
+                    }              
+                    var respId = ids[1].replace("\"", "");
+                    var respId = respId.replace("\"", "");
+                    //console.log('parte1->'+parteCompleta[1]);
+                    var idsPregunta = parteCompleta[1].split(':');
+                    var idPregLimpio = idsPregunta[0].replace('"id_pregunta"', 'id_pregunta');
+                    var respIdPreg = idsPregunta[1].replace("\"", "");
+                    var respIdPreg = respIdPreg.replace("\"", "");
+                    //console.log('parte2->'+parteCompleta[2]);
+                    var preguntaCompleta = parteCompleta[2].split(':');
+                    var prgLimpia = preguntaCompleta[0].replace('"pregunta"', 'pregunta');
+                    var respPregnt = preguntaCompleta[1].replace("\"", "");
+                    var respPregnt = respPregnt.replace("\"", "");
+                    //console.log('parte3->'+parteCompleta[3]);
+                    var respuestasCompleta = parteCompleta[3].split(':');
+                    var rspLmpia = respuestasCompleta[0].replace('"respuestas"', 'respuestas');
+                    var respPrgnCompe = respuestasCompleta[1].replace("\"", "");
+                    var respPrgnCompe = respPrgnCompe.replace("\"", "");
+                    //console.log('parte2->'+parteCompleta[4]);
+                    var catCompleta = parteCompleta[4].split(':');
+                    var catLimpia = catCompleta[0].replace('"categoria"', 'categoria');
+                    var catRspLmpia = catCompleta[1].replace("\"", "");
+                    var catRspLmpia = catRspLmpia.replace("\"", "");
+                    //console.log('parte2->'+parteCompleta[2]);
+                    var contCompleta = parteCompleta[5].split(':');
+                    var cntLmpia = contCompleta[0].replace('"si_continua"', 'si_continua');
+                    var contRsp = contCompleta[1].replace("\"", "");
+                    var contRsp = contRsp.replace("\"", "");
+                    //console.log('parte2->'+parteCompleta[2]);
+                    var noContCompleta = parteCompleta[6].split(':');
+                    var noContLimpia = noContCompleta[0].replace('"no_continua"', 'no_continua');
+                    var nocontResp = noContCompleta[1].replace("\"", "");
+                    var nocontResp = nocontResp.replace("\"", "");
+                    //console.log('parte2->'+parteCompleta[2]);
+                    var npContiComplta = parteCompleta[7].split(':');
+                    var npCntniaLmpia = npContiComplta[0].replace('"np_continua"', 'np_continua');
+                    var npContResp = npContiComplta[1].replace("\"", "");
+                    var npContResp = npContResp.replace("\"", "");
+                    //console.log('parte2->'+parteCompleta[2]);
+                    var accionCompleta = parteCompleta[8].split(':');
+                    var accLimpia = accionCompleta[0].replace('"accion"', 'accion');
+                    var accResp = accionCompleta[1].replace("\"", "");
+                    var accResp = accResp.replace("\"", "");
+                    //console.log('parte2->'+parteCompleta[2]);
+                    var proyectoCompleto = parteCompleta[9].split(':');
+                    var proyLimpio = proyectoCompleto[0].replace('"proyecto"', 'proyecto');
+                    var proyecResp = proyectoCompleto[1].replace("\"", "");
+                    var proyecResp = proyecResp.replace("\"", "");
+
+                    //transaction.executeSql("INSERT INTO proyectos_app (id, nombre, descripcion, version_form) VALUES (1,'appPRL','Aplicación para el seguimiento de obras de PRL','1')",[],nullHandler,errorHandler);
+                    
+                    //transaction.executeSql('INSERT INTO User(FirstName, LastName) VALUES (?,?)',[$('#txFirstName').val(), $('#txLastName').val()],nullHandler,errorHandler)
+
+                    //alert("INSERT INTO formulario (id, id_pregunta, pregunta, respuestas, categoria, si_continua, no_continua, np_continua, accion, proyecto) VALUES ("+id+",'"+idPregunta+"','"+pregunta+"','"+respuestas+"','"+categoria+"','"+siContinua+"','"+noContinua+"','"+npContinua+"','"+accion+"','"+proyecto+"'')");
+        
+                    transaction.executeSql('INSERT INTO formulario (id, id_pregunta, pregunta, respuestas, categoria, si_continua, no_continua, np_continua, accion, proyecto) VALUES (?,?,?,?,?,?,?,?,?,?)',[respId,respIdPreg, respPrgnCompe,rspLmpia,catRspLmpia,contRsp,nocontResp,npContResp,accResp,proyecResp],nullHandler,errorHandler);
+
+                    //db.transaction(function(tx){grabaRegistroForm(respId,respIdPreg,respPregnt,rspLmpia,catRspLmpia,contRsp,nocontResp,npContResp,accResp,proyecResp)});
+                    //alert('-> '+idLimpio+' -> '+respId+'\n -> '+idPregLimpio+' -> '+respIdPreg+'\n -> '+prgLimpia+' -> '+respPregnt+'\n -> '+rspLmpia+' -> '+respPrgnCompe+'\n -> '+catLimpia+' -> '+catRspLmpia+'\n -> '+cntLmpia+' -> '+contRsp+'\n -> '+noContLimpia+' -> '+nocontResp+'\n -> '+npCntniaLmpia+' ->'+npContResp+'\n -> '+accLimpia+' ->'+accResp+'\n -> '+proyLimpio+' ->'+proyecResp);
+                }
+
+            },errorHandler,successCallBack);
             
     });
+
+    listDBForm();
+    return false;
 }
-function actualizadoOK(tx, results) {
-    alert('actualizadoOK');
-    var len = results.rows.length;
-    alert('len->'+len);
-    for (var i=0; i<len; i++){
-        alert("id form = " + results.rows.item(i).id);
-        alert("pregunta form = " + results.rows.item(i).pregunta);
-    }
-}
-function querySuccess(tx, results) {
-    alert("querySuccess");
-    var len = results.rows.length;
-    alert("formulario table: " + len + " rows found.");
-    if(len=='0'){
-        alert('len corta...');
-        actualizaFila('1','1.8','blablabla');
-    }else{
-        for (var i=0; i<len; i++){
-            alert("Row = " + i + " ID = " + results.rows.item(i).id + 
-                " id_pregunta =  " + results.rows.item(i).id_pregunta + 
-                " pregunta =  " + results.rows.item(i).pregunta + 
-                " respuestas =  " + results.rows.item(i).respuestas + 
-                " categoria =  " + results.rows.item(i).categoria + 
-                " si_continua =  " + results.rows.item(i).si_continua + 
-                " no_continua =  " + results.rows.item(i).no_continua + 
-                " np_continua =  " + results.rows.item(i).np_continua + 
-                " accion =  " + results.rows.item(i).accion + 
-                " proyecto =  " + results.rows.item(i).proyecto);
-        }
-
-    }
-}
- 
-
-
-function atras(){
-    $('#tituloCabeceraPrincipal').html('PRL');
-    $('#basic_map').css('display','block');   
-    $('#onlineOffline').css('display','block'); 
-
-    $('#modoOnline').css('display','none'); 
-    $('#nuevoNombreForm').css('display','none'); 
-    $('#modoOffline').css('display','none'); 
-    $('#form').css('display','none'); 
-}
-function modoNav(zona){ 
-    $('#seleccionObra').val('0');
-    $('#obraName').val('');
-    $('#onlineOffline').css('display','none'); 
-    $('#basic_map').css('display','none');  
-    if(zona==1){
-        $('#tituloCabeceraPrincipal').html('PRL -- OFFLINE');
-        $('#onlOffl').val('0');
-        $('#modoOffline').css('display','block');    
-        $('#modoOnline').css('display','none'); 
-    }else{
-        actualizaDB();
-        $('#tituloCabeceraPrincipal').html('PRL -- ONLINE');
-        $('#onlOffl').val('1');
-        $('#modoOnline').css('display','block');
-        $('#modoOffline').css('display','none');
-    }
-}
-function abreNuevoForm(){
-    if($('#onlOffl').val()==0){
-        //Offline
-        $('#nuevoNombreForm').css('display','block');
-        $('#modoOffline').css('display','none');
-        $('#modoOnline').css('display','none'); 
-        $('#onlineOffline').css('display','none');    
-    }else{
-        //Online
-        if($('#seleccionObra').val()==0){
-            alert('Debe seleccionar una obra');
-        }else{
-            $('obraNombre').val($('#seleccionObra').val()); 
-            $('#form').css('display','block'); 
-            $('#obraName').val($('#seleccionObra').val());
-            window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, onRequestFileSystemSuccess, null);
-            $('#modoOnline').css('display','none'); 
-            $('#onlineOffline').css('display','none');    
-        }
-    }
-}
-function guardaFormTmp(){
-    alert($('#obraName').val());
-    if($('#obraName').val()=="Crear Nueva Revision"){
-        alert('Debe darle un nombre a la nueva revision');
-    }else{
-        $('#modoOnline').css('display','none'); 
-        $('#onlineOffline').css('display','none'); 
-        $('#nuevoNombreForm').css('display','none'); 
-        $('#form').css('display','block');  
-        window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, onRequestFileSystemSuccess, null);     
-        //Mostramos el form con el nombre:
-        $('#nombreFormularioTmp').html('');
-        $('#nombreFormularioTmp').html('FORMULARIO: '+nombreObra);
-        $('#form').css('display','block'); 
-    }   
-}
-
-/************CAMARA DE FOTOS**********/
-function abreCamaraFoto() {
-    navigator.camera.getPicture(onPhotoURISuccess, fsFail, { quality: 50, destinationType: Camera.DestinationType.FILE_URI });
-}
-function onPhotoURISuccess(imageURI) {
-    alert('imageURI->'+imageURI);
-    /*var carpetaDest = $('#carpetaTmpName').val();
-    alert('carpetaDest->'+carpetaDest);
-    imageURI.moveTo(carpetaDest, 'img000123.jpg', todoOK, fsFail);*/
-}
-function fsFail(error) {
-    alert('failed with error code: ' + error.code);
-}
-
-
-
-function onSuccess(position) {
-    alert('succes de onSuccess:'+position)
-    //var element = document.getElementById('geolocation');
-    /*element.innerHTML = 'Latitude: '           + position.coords.latitude              + '<br />' +
-                        'Longitude: '          + position.coords.longitude             + '<br />' +
-                        'Altitude: '           + position.coords.altitude              + '<br />' +
-                        'Accuracy: '           + position.coords.accuracy              + '<br />' +
-                        'Altitude Accuracy: '  + position.coords.altitudeAccuracy      + '<br />' +
-                        'Heading: '            + position.coords.heading               + '<br />' +
-                        'Speed: '              + position.coords.speed                 + '<br />' +
-                        'Timestamp: '          + position.timestamp                    + '<br />';
-
-    /*var map = new GMaps({
-            div: '#basic_map',
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-            width: '500px',
-            height: '500px',
-            zoom: 12,
-            zoomControl: true,
-            
-            zoomControlOpt: {
-                style: 'SMALL',
-                position: 'TOP_LEFT'
-            },
-            panControl: false
-    });
-    map.addMarker({
-        lat: position.coords.latitude,
-        lng: position.coords.longitude,
-        title: 'Yo',
-    });*/
-
-
-}
-
-
-$(window).load(function() {
-    alert('a');
-});
-
 </script>
