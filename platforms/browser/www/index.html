@@ -5,6 +5,8 @@
 
     <script type="text/javascript" charset="utf-8" src="cordova.js"></script>
     <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.12.2.min.js"></script>
+    <script type="text/javascript" src="js/jquery.loader.min.js"></script>
+    <link rel="stylesheet" href="css/jquery.loader.css" />
     <!---  VALOR APIKEY: AIzaSyCTj2UDMMYLM28CcqpQBGmycxMeUslXbRE --> 
     <!--<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTj2UDMMYLM28CcqpQBGmycxMeUslXbRE"></script>
     <script src="https://rawgit.com/HPNeo/gmaps/master/gmaps.js"></script>-->
@@ -73,26 +75,32 @@ var maxSize = 65535;
 
 // this is called when an error happens in a transaction
 function errorHandler(transaction, error) {
-   alert('Error: ' + error.message + ' code: ' + error.code);
    $('#formularioXML').css('display','none');
    $('#formularioXML').html('');
     if(error.code=='5'){
         alert('No tiene el formulario, debe conectarse en modo online para descargarlo.');
         onBodyLoad();
+    }else if(error.code=='6'){
+        console.log('Error: ' + error.message + ' code: ' + error.code);
+    }else{
+        alert('Error: ' + error.message + ' code: ' + error.code);
     }
+    $.loader('close');
 }
 // this is called when a successful transaction happens
 function successCallBack() {
-   alert("DEBUGGING: success");
-   AddValueToDB();
+    $.loader({className:"jquery-loader-background",content: ""});
+    //alert("DEBUGGING: success");
+    AddValueToDB();
 }
 function insertaFormCorrecta(){
-   alert("INSERTS: success");
+    alert("Formulario actualizado correctamente.");
+    $.loader('close');
 }
 function nullHandler(){};
 // called when the application loads
 function onBodyLoad(){
-alert("DEBUGGING: we are in the onBodyLoad() function");
+//alert("DEBUGGING: we are in the onBodyLoad() function");
  if (!window.openDatabase) {
    alert('Databases are not supported in this browser.');
    return;
@@ -114,17 +122,18 @@ function ListDBValues() {
             if (result != null && result.rows != null) {
                 for (var i = 0; i < result.rows.length; i++) {
                     var row = result.rows.item(i);
-                    alert('id->'+row.id+' version_form->'+row.version_form+' nombre-> '+row.nombre);
+                    //alert('id->'+row.id+' version_form->'+row.version_form+' nombre-> '+row.nombre);
                     var versionMvl = row.id;
                     $.post( "http://www.alu-ftth.com/appPrl/dameFormActualizado.php", { proyecto:'1', zona:'0'})
                         .done(function( data ) {
-                            alert('data del post->'+data);
+                            //alert('data del post->'+data);
                             data=2;
                             if(data!=versionMvl){
-                                alert('dif versiones..compruebo si tengo la tabla y la borro y la creo entera de 0.');
+                                //alert('dif versiones..compruebo si tengo la tabla y la borro y la creo entera de 0.');
                                 actualizaDatosForm(versionMvl);
                             }else{
-                             alert('misma version...acaba aqui, pinto form;');
+                                //alert('misma version...acaba aqui, pinto form;');
+                                listDBForm();
                             }
                         });  
                 }
@@ -135,19 +144,19 @@ function ListDBValues() {
 }
 
 function listDBForm() {
-    alert("DEBUGGING listDBForm: we are in the onBodyLoad() function");    
+    //alert("DEBUGGING listDBForm: we are in the onBodyLoad() function");    
     db = openDatabase(shortName, version, displayName,maxSize);
     db.transaction(function(tx){
         tx.executeSql('SELECT * FROM formulario;', [], function(tx, result) {
             if (result != null && result.rows != null) {
                 for (var i = 0; i < result.rows.length; i++) {
                     var row = result.rows.item(i);
-                    alert('id->'+row.id+' pregunta->'+row.pregunta+' respuestas-> '+row.respuestas);
+                    //alert('id->'+row.id+' pregunta->'+row.pregunta+' respuestas-> '+row.respuestas);
                     $('#formularioXML').css('display','block');
                     $('#formularioXML').append('ID:'+row.id+' Id Pregunta:'+row.id_pregunta+' Pregunta:'+row.pregunta+'Respuesta: '+row.respuestas+' Categoria: '+row.categoria+' Si_Continua: '+row.si_continua+' No_Continua: '+row.no_continua+' Np_Continua: '+row.np_continua+' Accion: '+row.accion+' Proyecto: '+row.proyecto+'<br/>');
                 }
             }else{
-                alert('No tiene el formulario, debe conectarse en modo online para descargarlo.');
+                //alert('No tiene el formulario, debe conectarse en modo online para descargarlo.');
                 onBodyLoad();
             }
         },errorHandler);
@@ -171,96 +180,25 @@ function actualizaDatosForm(versionMvl) {
    alert('Databases are not supported in this browser.');
    return;
  }
+
+        $.loader({className:"jquery-loader-background",content: ""});
         $.post( "http://www.alu-ftth.com/appPrl/dameFormActualizado.php", { proyecto:'1', zona:'1'})
         .done(function( data ) {
             console.log(data);
+            var json_obj = $.parseJSON(data);           
             db.transaction(function(transaction) {
-                var completas = data.split("},");
-                var contador = completas.length
-                alert('contador en post'+contador);
                 //Borro la tabla y la creo vacia:
                 transaction.executeSql('DROP TABLE formulario',[],nullHandler,errorHandler);
                 transaction.executeSql('UPDATE proyectos_app SET version_form=9 WHERE id=1',[],nullHandler,errorHandler);
-                //transaction.executeSql('UPDATE proyectos_app SET version_form=? WHERE id=1',[versionMvl],nullHandler,errorHandler);
-                transaction.executeSql('CREATE TABLE IF NOT EXISTS formulario (id unique, id_pregunta, pregunta, respuestas, categoria, si_continua, no_continua, np_continua, accion, proyecto)',[],nullHandler,errorHandler);
-                for (var i=0;i<contador;i++){
-                    var parteCompleta = completas[i].split('","');
-                    //console.log('\n\n PARTE COMPLETA:'+i+' DATOS: '+parteCompleta[0]+parteCompleta[1]+parteCompleta[2]+parteCompleta[3]+parteCompleta[4]+parteCompleta[5]+parteCompleta[6]+parteCompleta[7]+parteCompleta[8]+parteCompleta[9]);
-                    var ids = parteCompleta[0].split(':');
-                    if(i==0){
-                        var idLimpio = ids[0].replace('[{"id"', 'id');
-                    }else{
-                        var idLimpio = ids[0].replace('{"id"', 'id');
-                    }              
-                    var respId = ids[1].replace("\"", "");
-                    var respId = respId.replace("\"", "");
-                    //console.log('parte1->'+parteCompleta[1]);
-                    var idsPregunta = parteCompleta[1].split(':');
-                    var idPregLimpio = idsPregunta[0].replace('"id_pregunta"', 'id_pregunta');
-                    var respIdPreg = idsPregunta[1].replace("\"", "");
-                    var respIdPreg = respIdPreg.replace("\"", "");
-
-                    console.log('\nparte2->'+parteCompleta[2]);
-                    var preguntaCompleta = parteCompleta[2].split(':');
-                    var prgLimpia = preguntaCompleta[0].replace('"pregunta"', 'pregunta');
-                    var respPregnt = preguntaCompleta[1].replace("\"", "");
-                    var respPregnt = respPregnt.replace("\"", "");
-
-                    console.log('parte3Completa:->'+parteCompleta[3]);
-                    var respuestasCompleta = parteCompleta[3].split(':');
-                    var rspLmpia = respuestasCompleta[0].replace('"respuestas"', 'respuesta');  
-                    console.log('respt:->'+respuestasCompleta[1]);                  
-                    var respPrgnCompe = respuestasCompleta[1].replace("\"", "");
-                    console.log('resptLimpiadno:->'+respPrgnCompe);   
-                    var respPrgnCompe = respPrgnCompe.replace("\"", "");
-                    //console.log('parte2->'+parteCompleta[4]);
-                    var catCompleta = parteCompleta[4].split(':');
-                    var catLimpia = catCompleta[0].replace('"categoria"', 'categoria');
-                    var catRspLmpia = catCompleta[1].replace("\"", "");
-                    var catRspLmpia = catRspLmpia.replace("\"", "");
-                    //console.log('parte2->'+parteCompleta[2]);
-                    var contCompleta = parteCompleta[5].split(':');
-                    var cntLmpia = contCompleta[0].replace('"si_continua"', 'si_continua');
-                    var contRsp = contCompleta[1].replace("\"", "");
-                    var contRsp = contRsp.replace("\"", "");
-                    //console.log('parte2->'+parteCompleta[2]);
-                    var noContCompleta = parteCompleta[6].split(':');
-                    var noContLimpia = noContCompleta[0].replace('"no_continua"', 'no_continua');
-                    var nocontResp = noContCompleta[1].replace("\"", "");
-                    var nocontResp = nocontResp.replace("\"", "");
-                    //console.log('parte2->'+parteCompleta[2]);
-                    var npContiComplta = parteCompleta[7].split(':');
-                    var npCntniaLmpia = npContiComplta[0].replace('"np_continua"', 'np_continua');
-                    var npContResp = npContiComplta[1].replace("\"", "");
-                    var npContResp = npContResp.replace("\"", "");
-                    //console.log('parte2->'+parteCompleta[2]);
-                    var accionCompleta = parteCompleta[8].split(':');
-                    var accLimpia = accionCompleta[0].replace('"accion"', 'accion');
-                    var accResp = accionCompleta[1].replace("\"", "");
-                    var accResp = accResp.replace("\"", "");
-                    //console.log('parte2->'+parteCompleta[2]);
-                    var proyectoCompleto = parteCompleta[9].split(':');
-                    var proyLimpio = proyectoCompleto[0].replace('"proyecto"', 'proyecto');
-                    var aux = i+1;
-                    if (aux==contador){
-                        console.log('contador = i '+proyectoCompleto[1]);
-                        var proyecResp = proyectoCompleto[1].replace("}]","");
-
-                        console.log('proyecResp 1 '+proyecResp);
-                        var proyecResp = proyecResp.replace("\"", "");
-                        var proyecResp = proyecResp.replace("\"", "");
-                    }else{
-                        var proyecResp = proyectoCompleto[1].replace("\"", "");
-                        var proyecResp = proyecResp.replace("\"", "");
-                    }
-                    
-        
-                    transaction.executeSql('INSERT INTO formulario (id, id_pregunta, pregunta, respuestas, categoria, si_continua, no_continua, np_continua, accion, proyecto) VALUES (?,?,?,?,?,?,?,?,?,?)',[respId,respIdPreg, respPregnt,respPrgnCompe,catRspLmpia,contRsp,nocontResp,npContResp,accResp,proyecResp],nullHandler,errorHandler);
-
-                    //alert('-> '+idLimpio+' -> '+respId+'\n -> '+idPregLimpio+' -> '+respIdPreg+'\n -> '+prgLimpia+' -> '+respPregnt+'\n -> '+rspLmpia+' -> '+respPrgnCompe+'\n -> '+catLimpia+' -> '+catRspLmpia+'\n -> '+cntLmpia+' -> '+contRsp+'\n -> '+noContLimpia+' -> '+nocontResp+'\n -> '+npCntniaLmpia+' ->'+npContResp+'\n -> '+accLimpia+' ->'+accResp+'\n -> '+proyLimpio+' ->'+proyecResp);
+                transaction.executeSql('CREATE TABLE IF NOT EXISTS formulario (id unique, id_pregunta, pregunta, respuestas, categoria, si_continua, no_continua, np_continua, accion, proyecto)',[],nullHandler,errorHandler);                
+                for (var i in json_obj){
+                    utf_string = unescape(encodeURIComponent(json_obj[i].pregunta));
+                    fixed_string = decodeURIComponent(escape(utf_string));
+                    //alert('preguntaUtf->'+fixed_string);
+                    transaction.executeSql('INSERT INTO formulario (id, id_pregunta, pregunta, respuestas, categoria, si_continua, no_continua, np_continua, accion, proyecto) VALUES (?,?,?,?,?,?,?,?,?,?)',[json_obj[i].id,json_obj[i].id_pregunta,fixed_string ,json_obj[i].respuestas,json_obj[i].categoria,json_obj[i].si_continua,json_obj[i].no_continua,json_obj[i].np_continua,json_obj[i].accion,json_obj[i].proyecto],nullHandler,errorHandler);
                 }
-
-            },errorHandler,insertaFormCorrecta);
+            },errorHandler,insertaFormCorrecta);        
+        $.loader('close');
             
     });
 
@@ -322,7 +260,7 @@ function abreNuevoForm(){
     }
 }
 function guardaFormTmp(){
-    alert($('#obraName').val());
+    //alert($('#obraName').val());
     if($('#obraName').val()=="Crear Nueva Revision"){
         alert('Debe darle un nombre a la nueva revision');
     }else{
@@ -343,7 +281,7 @@ function abreCamaraFoto() {
     navigator.camera.getPicture(onPhotoURISuccess, fsFail, { quality: 50, destinationType: Camera.DestinationType.FILE_URI });
 }
 function onPhotoURISuccess(imageURI) {
-    alert('imageURI->'+imageURI);
+    //alert('imageURI->'+imageURI);
     /*var carpetaDest = $('#carpetaTmpName').val();
     alert('carpetaDest->'+carpetaDest);
     imageURI.moveTo(carpetaDest, 'img000123.jpg', todoOK, fsFail);*/
