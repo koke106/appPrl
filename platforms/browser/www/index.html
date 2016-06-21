@@ -111,10 +111,9 @@ function ListDBValues() {
                             data=2;
                             if(data!=versionMvl){
                                 alert('dif versiones..compruebo si tengo la tabla y la borro y la creo entera de 0.');
-                                actualizaDatosForm();
+                                actualizaDatosForm(versionMvl);
                             }else{
                              alert('misma version...acaba aqui, pinto form;');
-                             return false;
                             }
                         });  
                 }
@@ -153,7 +152,7 @@ function AddValueToDB() {
     ListDBValues();
     return false;
 }
-function actualizaDatosForm() {
+function actualizaDatosForm(versionMvl) {
  if (!window.openDatabase) {
    alert('Databases are not supported in this browser.');
    return;
@@ -167,6 +166,7 @@ function actualizaDatosForm() {
                 alert('contador en post'+contador);
                 //Borro la tabla y la creo vacia:
                 transaction.executeSql('DROP TABLE formulario',[],nullHandler,errorHandler);
+                transaction.executeSql('UPDATE proyectos_app SET version_form=? WHERE id=1',[versionMvl],nullHandler,errorHandler);
                 transaction.executeSql('CREATE TABLE IF NOT EXISTS formulario (id unique, id_pregunta, pregunta, respuestas, categoria, si_continua, no_continua, np_continua, accion, proyecto)',[],nullHandler,errorHandler);
                 for (var i=0;i<contador;i++){
                     var parteCompleta = completas[i].split(',');
@@ -223,16 +223,9 @@ function actualizaDatosForm() {
                     var proyLimpio = proyectoCompleto[0].replace('"proyecto"', 'proyecto');
                     var proyecResp = proyectoCompleto[1].replace("\"", "");
                     var proyecResp = proyecResp.replace("\"", "");
-
-                    //transaction.executeSql("INSERT INTO proyectos_app (id, nombre, descripcion, version_form) VALUES (1,'appPRL','Aplicación para el seguimiento de obras de PRL','1')",[],nullHandler,errorHandler);
-                    
-                    //transaction.executeSql('INSERT INTO User(FirstName, LastName) VALUES (?,?)',[$('#txFirstName').val(), $('#txLastName').val()],nullHandler,errorHandler)
-
-                    //alert("INSERT INTO formulario (id, id_pregunta, pregunta, respuestas, categoria, si_continua, no_continua, np_continua, accion, proyecto) VALUES ("+id+",'"+idPregunta+"','"+pregunta+"','"+respuestas+"','"+categoria+"','"+siContinua+"','"+noContinua+"','"+npContinua+"','"+accion+"','"+proyecto+"'')");
         
                     transaction.executeSql('INSERT INTO formulario (id, id_pregunta, pregunta, respuestas, categoria, si_continua, no_continua, np_continua, accion, proyecto) VALUES (?,?,?,?,?,?,?,?,?,?)',[respId,respIdPreg, respPrgnCompe,rspLmpia,catRspLmpia,contRsp,nocontResp,npContResp,accResp,proyecResp],nullHandler,errorHandler);
 
-                    //db.transaction(function(tx){grabaRegistroForm(respId,respIdPreg,respPregnt,rspLmpia,catRspLmpia,contRsp,nocontResp,npContResp,accResp,proyecResp)});
                     //alert('-> '+idLimpio+' -> '+respId+'\n -> '+idPregLimpio+' -> '+respIdPreg+'\n -> '+prgLimpia+' -> '+respPregnt+'\n -> '+rspLmpia+' -> '+respPrgnCompe+'\n -> '+catLimpia+' -> '+catRspLmpia+'\n -> '+cntLmpia+' -> '+contRsp+'\n -> '+noContLimpia+' -> '+nocontResp+'\n -> '+npCntniaLmpia+' ->'+npContResp+'\n -> '+accLimpia+' ->'+accResp+'\n -> '+proyLimpio+' ->'+proyecResp);
                 }
 
