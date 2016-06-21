@@ -1,15 +1,16 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.nokia.appPRL" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0" xmlns:gap="http://phonegap.com/ns/1.0">
+<widget id="com.nokia.appPrl" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0" xmlns:gap="http://phonegap.com/ns/1.0">
     <feature name="Device">
         <param name="browser-package" value="Device" />
     </feature>
-    <name>AppPrl</name>
+    <name>appPrl</name>
     <description>
         Aplicacion para gestion de formularios
     </description>
     <author email="koke106@gmail.com" href="http://alu-ftth.com">
         KokePeinado
     </author>
+    <content src="index.html" />
     <preference name="permissions" value="none" />
     <preference name="orientation" value="default" />
     <preference name="target-device" value="universal" />

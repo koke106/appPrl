@@ -61,7 +61,7 @@
 
 <!--Funciones necesarias:-->
 <script type="text/javascript" charset="utf-8">
-document.addEventListener("deviceready", onBodyLoad, false);
+//document.addEventListener("deviceready", onBodyLoad, false);
 
 var db;
 var shortName = 'prl';
@@ -77,6 +77,9 @@ function errorHandler(transaction, error) {
 function successCallBack() {
    alert("DEBUGGING: success");
    AddValueToDB();
+}
+function insertaFormCorrecta(){
+   alert("INSERTS: success");
 }
 function nullHandler(){};
 // called when the application loads
@@ -128,13 +131,16 @@ function listDBForm() {
         alert('Databases are not supported in this browser.');
     return;
     } 
-    db.transaction(function(transaction) {
+    db = openDatabase(shortName, version, displayName,maxSize);
+    db.transaction(function(transaction){
         transaction.executeSql('SELECT * FROM formulario;', [], function(transaction, result) {
             if (result != null && result.rows != null) {
                 for (var i = 0; i < result.rows.length; i++) {
                     var row = result.rows.item(i);
                     alert('id->'+row.id+' pregunta->'+row.pregunta+' respuestas-> '+row.respuestas);
                 }
+            }else{
+                alert('No tiene el formulario, debe conectarse en modo online para descargarlo.');
             }
         },errorHandler);
     },errorHandler,nullHandler);
@@ -229,14 +235,13 @@ function actualizaDatosForm(versionMvl) {
                     //alert('-> '+idLimpio+' -> '+respId+'\n -> '+idPregLimpio+' -> '+respIdPreg+'\n -> '+prgLimpia+' -> '+respPregnt+'\n -> '+rspLmpia+' -> '+respPrgnCompe+'\n -> '+catLimpia+' -> '+catRspLmpia+'\n -> '+cntLmpia+' -> '+contRsp+'\n -> '+noContLimpia+' -> '+nocontResp+'\n -> '+npCntniaLmpia+' ->'+npContResp+'\n -> '+accLimpia+' ->'+accResp+'\n -> '+proyLimpio+' ->'+proyecResp);
                 }
 
-            },errorHandler,successCallBack);
+            },errorHandler,insertaFormCorrecta);
             
     });
 
     listDBForm();
     return false;
 }
-
 
 /******************NAVEGACION APP*********************/
 function atras(){
@@ -255,12 +260,13 @@ function modoNav(zona){
     $('#onlineOffline').css('display','none'); 
     $('#basic_map').css('display','none');  
     if(zona==1){
+        listDBForm();
         $('#tituloCabeceraPrincipal').html('PRL -- OFFLINE');
         $('#onlOffl').val('0');
         $('#modoOffline').css('display','block');    
         $('#modoOnline').css('display','none'); 
     }else{
-        actualizaDB();
+        onBodyLoad();
         $('#tituloCabeceraPrincipal').html('PRL -- ONLINE');
         $('#onlOffl').val('1');
         $('#modoOnline').css('display','block');
