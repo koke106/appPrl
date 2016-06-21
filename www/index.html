@@ -76,7 +76,7 @@ function errorHandler(transaction, error) {
    alert('Error: ' + error.message + ' code: ' + error.code);
    $('#formularioXML').css('display','none');
    $('#formularioXML').html('');
-    if(error.code==5){
+    if(error.code=='5'){
         alert('No tiene el formulario, debe conectarse en modo online para descargarlo.');
         onBodyLoad();
     }
@@ -241,6 +241,7 @@ function actualizaDatosForm(versionMvl) {
                     //console.log('parte2->'+parteCompleta[2]);
                     var proyectoCompleto = parteCompleta[9].split(':');
                     var proyLimpio = proyectoCompleto[0].replace('"proyecto"', 'proyecto');
+                    if (i==contador)
                     var proyecResp = proyectoCompleto[1].replace("\"", "");
                     var proyecResp = proyecResp.replace("\"", "");
         
